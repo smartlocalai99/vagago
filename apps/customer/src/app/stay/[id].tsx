@@ -10,7 +10,8 @@ import { StayGallery } from '@/components/stay-gallery';
 import { HiddenLocation } from '@/components/hidden-location';
 import { NearbyPlaces } from '@/components/nearby-places';
 import { PriceDisplay } from '@/components/price-display';
-import { money, stays } from '@/data/stays';
+import { money } from '@/data/stays';
+import { useCatalog } from '@/state/catalog-context';
 import { getRoomOptions, type RoomOption } from '@/data/room-options';
 import { useEscape } from '@/state/escape-context';
 import { colors, fonts } from '@/theme';
@@ -131,7 +132,9 @@ function StayDetailContent({ stay }: { stay: Stay }) {
 
 export default function StayDetails() {
   const { id } = useLocalSearchParams<{ id: string }>();
+  const { stays, ready } = useCatalog();
   const stay = stays.find((item) => item.id === id);
+  if (!stay && !ready) return <Page><Stack.Screen options={{ title: 'Property details' }} /></Page>;
   if (!stay) return <Page><Stack.Screen options={{ title: 'Property details' }} /><EmptyState title="Stay not found" body="This property is no longer listed." action="Explore stays" onAction={() => router.replace('/')} icon="search" /></Page>;
   return <StayDetailContent key={stay.id} stay={stay} />;
 }

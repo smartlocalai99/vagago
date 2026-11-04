@@ -96,8 +96,8 @@ function Gallery({ stay, compact = false, onOpen }: GalleryProps) {
         {photos.map((photo, index) => onOpen ? <Pressable key={index} onPress={onOpen} onPressIn={pause}
           accessibilityRole="button" accessibilityLabel={`View ${stay.name}, photo ${index + 1} of ${photos.length}`}
           style={{ width, height: '100%' }}>
-          <Image source={photo} contentFit="cover" style={{ width: '100%', height: '100%' }} accessible={false} />
-        </Pressable> : <Image key={index} source={photo} contentFit="cover" style={{ width, height: '100%' }}
+          <Image source={photo} contentFit="cover" cachePolicy="memory-disk" transition={150} recyclingKey={`${stay.id}-${index}`} style={{ width: '100%', height: '100%' }} accessible={false} />
+        </Pressable> : <Image key={index} source={photo} contentFit="cover" cachePolicy="memory-disk" transition={150} style={{ width, height: '100%' }}
           accessibilityLabel={`${stay.name}, representative photo ${index + 1} of ${photos.length}`} />)}
       </ScrollView> : null}
 
@@ -117,7 +117,7 @@ function Gallery({ stay, compact = false, onOpen }: GalleryProps) {
       {photos.map((photo, index) => <Pressable key={index} accessibilityRole="button" accessibilityLabel={`Show photo ${index + 1} of ${stay.name}`}
         accessibilityState={{ selected: selected === index }} onPress={() => selectPhoto(index)}
         style={({ pressed }) => ({ width: 74, height: 58, padding: 3, borderWidth: 1.5, borderColor: selected === index ? colors.pine : colors.stone, borderRadius: 10, opacity: pressed ? 0.7 : 1 })}>
-        <Image source={photo} contentFit="cover" style={{ width: '100%', height: '100%', borderRadius: 6 }} accessible={false} />
+        <Image source={photo} contentFit="cover" cachePolicy="memory-disk" style={{ width: '100%', height: '100%', borderRadius: 6 }} accessible={false} />
       </Pressable>)}
     </ScrollView> : null}
   </View>;

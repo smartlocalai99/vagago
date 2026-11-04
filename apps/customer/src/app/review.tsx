@@ -8,12 +8,14 @@ import { AppText, Button, EmptyState, Heading, Page } from '@/components/ui';
 import { formatDate } from '@/components/escape-summary';
 import { Icon } from '@/components/icon';
 import { useEscape, validateBookingGuest } from '@/state/escape-context';
-import { money, stays } from '@/data/stays';
+import { money } from '@/data/stays';
+import { useStays } from '@/state/catalog-context';
 import { getRoomOptions } from '@/data/room-options';
 import { colors, fonts } from '@/theme';
 
 export default function Review() {
   const { draft, bookingGuest, updateBookingGuest } = useEscape();
+  const stays = useStays();
   const insets = useSafeAreaInsets();
   const [submitted, setSubmitted] = useState(false);
   const nameInput = useRef<TextInput>(null);
@@ -45,7 +47,7 @@ export default function Review() {
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}><View style={{ width: 24, height: 24, borderRadius: 12, backgroundColor: colors.pine, alignItems: 'center', justifyContent: 'center' }}><AppText style={{ fontSize: 11, fontFamily: fonts.bold, color: colors.white }}>1</AppText></View><AppText style={{ fontSize: 12, fontFamily: fonts.bold }}>Booking details</AppText><View style={{ flex: 1, height: 1, backgroundColor: colors.stone }} /><AppText style={{ fontSize: 12, color: colors.fern }}>2 · Payment</AppText></View>
       <View style={{ borderWidth: 1, borderColor: colors.stone, borderRadius: 16, padding: 14, gap: 12 }}>
         <View style={{ flexDirection: 'row', gap: 13, alignItems: 'center' }}>
-          <Image source={stay.image} style={{ width: 84, height: 90, borderRadius: 11 }} contentFit="cover" accessibilityLabel={`${stay.name} photo`} />
+          <Image source={stay.thumbnail} cachePolicy="memory-disk" style={{ width: 84, height: 90, borderRadius: 11 }} contentFit="cover" accessibilityLabel={`${stay.name} photo`} />
           <View style={{ flex: 1, gap: 4 }}><AppText style={{ fontSize: 10, color: colors.fern }}>{stay.area}, Vagamon</AppText><Heading size={17}>{stay.name}</Heading><AppText style={{ fontSize: 12, color: colors.fern }}>{room.name} · {room.beds}</AppText></View>
         </View>
         <View style={{ flexDirection: 'row', gap: 7, alignItems: 'center', borderTopWidth: 1, borderColor: colors.stone, paddingTop: 12 }}><Icon name="lock" size={14} /><AppText style={{ flex: 1, fontSize: 11, lineHeight: 17, color: colors.fern }}>Exact address and directions appear after you book</AppText></View>

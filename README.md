@@ -71,11 +71,32 @@ docs/                      Product plan, design, research, and future architectu
 
 The shared package is available to workspace clients as `@vagago/domain`. Its current estimates and filters are for the preview only; future booking APIs must calculate authoritative prices and enforce inventory on the server.
 
+## Admin dashboard (`apps/admin`)
+
+A phone-sized Next.js (Pages Router) web app for VagaGo staff, installable with **Add to Home Screen**. It is a static export that talks to Supabase from the browser, so any static host works.
+
+- **Sign in:** username + 4-digit PIN. Accounts live in Supabase Auth as `<username>@admin.vagago.app` with the PIN expanded to `vagago-admin-pin-<PIN>`, and must be listed in `platform_admins`.
+- **Home:** arrivals today, guests in-house, next 7 days, live hotels, latest bookings.
+- **Bookings:** upcoming / in-house / past / cancelled with search; call or WhatsApp the guest; check in, check out, no-show, cancel. New bookings arrive live over Supabase Realtime with a banner, with no polling.
+- **Hotels:** list by status and a six-step onboarding flow: basics, exact location (current GPS or a pasted Google Maps link), room types and prices, photos, amenities, then publish. Admins publish, unpublish, suspend and reinstate.
+- **Photos:** resized in the browser to 1600px plus a 480px thumbnail (`<id>.thumb.webp`), then uploaded to the public `property-photos` bucket under `<property_id>/`.
+
+```sh
+npm run dev --workspace @vagago/admin      # http://localhost:3001
+npm run build --workspace @vagago/admin    # static site in apps/admin/out
+npx vercel login && npm run deploy --workspace @vagago/admin
+```
+
+### Keeping database traffic low
+
+- Customer app: one request loads every published listing with rooms, photos and amenities; it is cached on the device and refreshed after 10 minutes or on pull-to-refresh. Attractions load once per launch. Bookings refresh at most once a minute, exact addresses are fetched once per booking, and photos use the device image cache with small thumbnails in lists.
+- Admin: one request per list (SWR, no refetch on focus), saves patch the cache instead of reloading, and realtime keeps bookings current.
+
 ## Database (Supabase)
 
 `supabase/migrations/` holds the shared schema for the customer app, hotel app and admin dashboard: profiles, platform admins, properties with private exact locations, hotel team memberships and invitations, room types, daily rates, inventory blocks, photos, amenities, offers, attractions, reservations with per-night prices, payments, reviews and an audit log. Row level security limits customers to their own bookings, hotel teams to their own properties, and publishing to admins. Bookings go through `create_reservation`, which prices the stay and checks availability in the database; `cancel_reservation`, `update_reservation_status`, `accept_property_invitation` and `reservation_location` cover the rest of the lifecycle. Money is stored in paise.
 
-`supabase/seed.sql` adds the three fictional demo stays for local development only. To make someone an admin, insert their auth user id into `platform_admins` from the SQL editor. The customer app connects to the hosted project (`rjdnsyhvemywztlngqvs`) through `apps/customer/src/lib/supabase.ts`, using `EXPO_PUBLIC_SUPABASE_URL` and `EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY` from `apps/customer/.env` locally and `eas.json` for cloud builds. These are public client values; never put the secret or service-role key in the app. Nearby attractions load from the database today; listings and bookings still use bundled data and on-device storage until sign-in is added. Regenerate types with `npx supabase gen types --remote --lang typescript --schema public > apps/customer/src/lib/database.types.ts`.
+`supabase/seed.sql` adds the three fictional demo stays for local development only. To make someone an admin, insert their auth user id into `platform_admins` from the SQL editor. The customer app connects to the hosted project (`rjdnsyhvemywztlngqvs`) through `apps/customer/src/lib/supabase.ts`, using `EXPO_PUBLIC_SUPABASE_URL` and `EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY` from `apps/customer/.env` locally and `eas.json` for cloud builds. These are public client values; never put the secret or service-role key in the app. Listings, attractions and bookings come from the database. Guests book without an account: the first booking signs the device in anonymously (requires anonymous sign-ins enabled in the project), and their bookings follow that device session. Regenerate types with `npx supabase gen types --remote --lang typescript --schema public > apps/customer/src/lib/database.types.ts`.
 
 ## Later connected milestone
 

@@ -80,7 +80,7 @@ test('guest and budget boundaries are enforced without coercing input', () => {
 
 test('unsupported selectors and incomplete persisted plans are safely invalid', () => {
   assert.ok(validateGetawayDraft({ ...draft, mood: 'luxury' }, { today }).errors.mood);
-  assert.ok(validateGetawayDraft({ ...draft, stayStyle: 'hotel' }, { today }).errors.stayStyle);
+  assert.ok(validateGetawayDraft({ ...draft, stayStyle: 'castle' }, { today }).errors.stayStyle);
   assert.ok(validateGetawayDraft({ ...draft, query: 'x'.repeat(121) }, { today }).errors.query);
   assert.equal(validateGetawayDraft(null, { today }).valid, false);
   assert.equal(validateGetawayDraft([], { today }).valid, false);

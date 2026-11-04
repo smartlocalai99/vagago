@@ -1,0 +1,32 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
+  --color-forest: #073728;
+  --color-forest-soft: #E7EFEB;
+  --color-ink: #1C1F1E;
+  --color-muted: #66706C;
+  --color-line: #E4E7E5;
+  --color-surface: #F5F6F5;
+  --color-danger: #B3261E;
+  --color-danger-soft: #FCEEEC;
+  --color-warn: #8A5A00;
+  --color-warn-soft: #FFF4DB;
+  --color-ok: #146C43;
+  --color-ok-soft: #E6F4EC;
+}
+
+html { -webkit-tap-highlight-color: transparent; }
+body { background: #E9ECEA; color: var(--color-ink); }
+input, select, textarea { font-size: 16px; }
+
+@utility field {
+  width: 100%;
+  min-height: 48px;
+  border-radius: 12px;
+  border: 1px solid var(--color-line);
+  background: white;
+  padding: 12px 14px;
+  outline: none;
+  &:focus { border-color: var(--color-forest); box-shadow: 0 0 0 3px rgb(7 55 40 / 0.12); }
+}

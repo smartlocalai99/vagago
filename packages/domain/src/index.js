@@ -6,7 +6,7 @@
 const MILLISECONDS_PER_DAY = 86_400_000;
 
 export const MOODS = Object.freeze(['peaceful', 'adventurous', 'romantic', 'nature']);
-export const STAY_STYLES = Object.freeze(['all', 'villa', 'cottage', 'homestay']);
+export const STAY_STYLES = Object.freeze(['all', 'villa', 'cottage', 'homestay', 'resort', 'hotel']);
 
 /**
  * @typedef {Object} GetawayDraft

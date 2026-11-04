@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import { Keyboard, Pressable, ScrollView, TextInput, View } from 'react-native';
+import { Keyboard, Pressable, RefreshControl, ScrollView, TextInput, View } from 'react-native';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { matchPreviewStays, validateGetawayDraft } from '@vagago/domain';
 import { AppText, EmptyState, StayCard } from '@/components/ui';
 import { Icon, type IconName } from '@/components/icon';
-import { stays } from '@/data/stays';
+import { useCatalog } from '@/state/catalog-context';
 import { useEscape } from '@/state/escape-context';
 import { colors, fonts } from '@/theme';
 import type { StayStyle } from '@/types';
@@ -28,6 +28,7 @@ function shortDate(value: string) {
 
 export default function Explore() {
   const { draft, updateDraft } = useEscape();
+  const { stays, refreshing, refresh, error } = useCatalog();
   const insets = useSafeAreaInsets();
   const [sort, setSort] = useState<(typeof sortOptions)[number]['id']>('recommended');
   const [sorting, setSorting] = useState(false);
@@ -73,12 +74,14 @@ export default function Explore() {
         })}
       </View>
     </View>
-    <ScrollView contentInsetAdjustmentBehavior="never" keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag" contentContainerStyle={{ paddingBottom: 96 + insets.bottom }}>
+    <ScrollView contentInsetAdjustmentBehavior="never" keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag" contentContainerStyle={{ paddingBottom: 96 + insets.bottom }}
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => void refresh()} tintColor={colors.fern} />}>
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12, paddingHorizontal: 18, paddingVertical: 4 }}>
         <AppText style={{ color: colors.fern, fontSize: 12 }}>{results.length} {results.length === 1 ? 'stay' : 'stays'} in Vagamon</AppText>
         <Pressable accessibilityRole="button" accessibilityLabel="Sort stays" accessibilityState={{ expanded: sorting }} onPress={() => setSorting(!sorting)} style={{ minHeight: 40, flexDirection: 'row', alignItems: 'center', gap: 5 }}><Icon name="sort" size={14} color={colors.ink} /><AppText style={{ fontSize: 12, fontFamily: fonts.semibold }}>Sort</AppText></Pressable>
       </View>
       {sorting ? <View style={{ backgroundColor: colors.canvas, borderRadius: 14, padding: 6, marginHorizontal: 16, marginBottom: 10 }}>{sortOptions.map((option) => <Pressable key={option.id} accessibilityRole="button" accessibilityState={{ selected: sort === option.id }} onPress={() => { setSort(option.id); setSorting(false); }} style={{ minHeight: 46, paddingHorizontal: 12, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}><AppText style={{ fontSize: 13 }}>{option.label}</AppText>{sort === option.id ? <Icon name="check" size={17} /> : null}</Pressable>)}</View> : null}
+      {error ? <AppText style={{ fontSize: 12, color: colors.error, marginHorizontal: 18, marginBottom: 10 }}>{error}</AppText> : null}
       {!valid ? <Pressable accessibilityRole="button" accessibilityLabel="Update travel dates" onPress={editSearch} style={{ backgroundColor: colors.softError, padding: 12, borderRadius: 10, marginHorizontal: 16, marginBottom: 10 }}><AppText style={{ fontSize: 12, color: colors.error }}>Update your dates to continue booking.</AppText></Pressable> : null}
       {results.length ? results.map((stay) => <StayCard key={stay.id} stay={stay} />) : <View style={{ paddingHorizontal: 20 }}><EmptyState title="No stays found" body="Try another name or place, or change the property type." action="Clear search" onAction={() => updateDraft({ query: '', stayStyle: 'all' })} /></View>}
     </ScrollView>

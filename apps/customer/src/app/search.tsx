@@ -7,7 +7,8 @@ import { matchPreviewStays, validateGetawayDraft } from '@vagago/domain';
 import { DateRange } from '@/components/date-range';
 import { Icon } from '@/components/icon';
 import { AppText, Button, Heading } from '@/components/ui';
-import { money, stays } from '@/data/stays';
+import { money } from '@/data/stays';
+import { useStays } from '@/state/catalog-context';
 import { useEscape } from '@/state/escape-context';
 import { createDefaultDraft } from '@/state/storage-records';
 import { colors, fonts } from '@/theme';
@@ -25,6 +26,7 @@ export default function SearchScreen() {
   const { returnTo } = useLocalSearchParams<{ returnTo?: string }>();
   const editingBooking = returnTo === 'review';
   const { draft, updateDraft } = useEscape();
+  const stays = useStays();
   const insets = useSafeAreaInsets();
   const scroll = useRef<ScrollView>(null);
   const [pending, setPending] = useState<EscapeDraft>(() => ({ ...draft, mood: null }));

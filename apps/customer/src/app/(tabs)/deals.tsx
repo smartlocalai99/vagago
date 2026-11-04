@@ -2,10 +2,11 @@ import { View } from 'react-native';
 import { router } from 'expo-router';
 import { AppText, EmptyState, Heading, Page, StayCard } from '@/components/ui';
 import { getPublishedHotDeals } from '@/data/hot-deals';
-import { stays } from '@/data/stays';
+import { useStays } from '@/state/catalog-context';
 import { colors, fonts } from '@/theme';
 
 export default function Offers() {
+  const stays = useStays();
   const offers = getPublishedHotDeals().flatMap((deal) => {
     const stay = stays.find((item) => item.id === deal.stayId);
     return stay ? [{ deal, stay }] : [];

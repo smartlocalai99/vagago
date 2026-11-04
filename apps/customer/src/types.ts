@@ -1,7 +1,7 @@
 import { ImageSource } from 'expo-image';
 
 export type Mood = 'peaceful' | 'adventurous' | 'romantic' | 'nature';
-export type StayStyle = 'all' | 'villa' | 'cottage' | 'homestay';
+export type StayStyle = 'all' | 'villa' | 'cottage' | 'homestay' | 'resort' | 'hotel';
 export type EscapeDraft = {
   checkIn: string;
   checkOut: string;
@@ -13,6 +13,16 @@ export type EscapeDraft = {
   stayId: string | null;
   roomOptionId?: string | null;
   roomCount?: number;
+};
+export type RoomOption = {
+  id: string;
+  name: string;
+  description: string;
+  capacity: number;
+  nightlyRate: number;
+  compareAtRate?: number;
+  beds: string;
+  features: string[];
 };
 export type Stay = {
   id: string;
@@ -27,11 +37,13 @@ export type Stay = {
   moods: Mood[];
   stayStyle: Exclude<StayStyle, 'all'>;
   image: ImageSource;
+  // Small copy of the cover photo for lists.
+  thumbnail: ImageSource;
   gallery: ImageSource[];
-  highlights: { title: string; description: string; icon: 'sun' | 'leaf' | 'mountain' | 'coffee' | 'moon' | 'home' }[];
   amenities: string[];
   area: string;
-  address: string;
+  // Rounded public position; the exact address is released with a booking.
   coordinates: Coordinates;
+  rooms: RoomOption[];
 };
 export type Coordinates = { latitude: number; longitude: number };

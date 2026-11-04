@@ -1,11 +1,11 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Pressable, View } from 'react-native';
 import { Image } from 'expo-image';
-import { router } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 import { AppText, EmptyState, Heading, Page } from '@/components/ui';
 import { formatDate } from '@/components/escape-summary';
 import { Icon } from '@/components/icon';
-import { stays } from '@/data/stays';
+import { useStays } from '@/state/catalog-context';
 import { useBookings, type Booking } from '@/state/bookings-context';
 import { getTodayInKolkata } from '@vagago/domain';
 import { colors, fonts } from '@/theme';
@@ -14,13 +14,15 @@ const bookingTabs = ['Upcoming', 'Past', 'Cancelled'] as const;
 type BookingTab = typeof bookingTabs[number];
 
 function tabFor(booking: Booking, today: string): BookingTab {
-  if (booking.status === 'cancelled') return 'Cancelled';
-  return booking.checkOut < today ? 'Past' : 'Upcoming';
+  if (booking.status === 'cancelled' || booking.status === 'no_show') return 'Cancelled';
+  return booking.status === 'completed' || booking.checkOut < today ? 'Past' : 'Upcoming';
 }
 
 export default function Bookings() {
   const [selected, setSelected] = useState<BookingTab>('Upcoming');
-  const { bookings } = useBookings();
+  const { bookings, refresh } = useBookings();
+  const stays = useStays();
+  useFocusEffect(useCallback(() => { void refresh(); }, [refresh]));
   const today = getTodayInKolkata();
   const visible = bookings.filter((booking) => tabFor(booking, today) === selected)
     .sort((a, b) => selected === 'Upcoming' ? a.checkIn.localeCompare(b.checkIn) : b.checkIn.localeCompare(a.checkIn));
@@ -36,16 +38,15 @@ export default function Bookings() {
     {visible.length ? <View style={{ gap: 18 }}>
       {visible.map((booking) => {
         const stay = stays.find((item) => item.id === booking.stayId);
-        if (!stay) return null;
-        return <Pressable key={booking.id} accessibilityRole="button" accessibilityLabel={`${stay.name}, ${formatDate(booking.checkIn)} to ${formatDate(booking.checkOut)}`}
+        return <Pressable key={booking.id} accessibilityRole="button" accessibilityLabel={`${stay?.name ?? 'Your stay'}, ${formatDate(booking.checkIn)} to ${formatDate(booking.checkOut)}`}
           onPress={() => router.push({ pathname: '/booking/[id]', params: { id: booking.id } })}
           style={({ pressed }) => ({ flexDirection: 'row', gap: 14, alignItems: 'center', opacity: pressed ? 0.7 : 1 })}>
-          <Image source={stay.image} contentFit="cover" style={{ width: 92, height: 92, borderRadius: 12 }} accessible={false} />
+          <Image source={stay?.thumbnail} contentFit="cover" cachePolicy="memory-disk" style={{ width: 92, height: 92, borderRadius: 12, backgroundColor: colors.stone }} accessible={false} />
           <View style={{ flex: 1, gap: 3 }}>
-            <AppText style={{ fontFamily: fonts.bold, fontSize: 15 }}>{stay.name}</AppText>
+            <AppText style={{ fontFamily: fonts.bold, fontSize: 15 }}>{stay?.name ?? 'Your stay'}</AppText>
             <AppText style={{ fontSize: 12, color: colors.fern }}>{formatDate(booking.checkIn)} – {formatDate(booking.checkOut)}</AppText>
             <AppText style={{ fontSize: 12, color: colors.fern }}>{booking.guests} {booking.guests === 1 ? 'guest' : 'guests'} · {booking.reference}</AppText>
-            {booking.status === 'confirmed' && selected === 'Upcoming' ? <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5, paddingTop: 2 }}><Icon name="pin" size={13} /><AppText style={{ fontSize: 11, color: colors.pine, fontFamily: fonts.semibold }}>Address and directions</AppText></View> : null}
+            {(booking.status === 'confirmed' || booking.status === 'checked_in') && selected === 'Upcoming' ? <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5, paddingTop: 2 }}><Icon name="pin" size={13} /><AppText style={{ fontSize: 11, color: colors.pine, fontFamily: fonts.semibold }}>Address and directions</AppText></View> : null}
           </View>
           <Icon name="chevron" size={16} color={colors.fern} />
         </Pressable>;

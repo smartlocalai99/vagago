@@ -8,12 +8,15 @@ import { Icon } from '@/components/icon';
 import { useEscape, validateBookingGuest } from '@/state/escape-context';
 import { useBookings } from '@/state/bookings-context';
 import { getRoomOptions } from '@/data/room-options';
-import { money, stays } from '@/data/stays';
+import { money } from '@/data/stays';
+import { useStays } from '@/state/catalog-context';
 import { colors, fonts } from '@/theme';
 
 export default function Payment() {
   const { draft, bookingGuest, updateDraft } = useEscape();
   const { createBooking } = useBookings();
+  const stays = useStays();
+  const [bookingError, setBookingError] = useState<string | null>(null);
   const [method, setMethod] = useState<'stay'>('stay');
   const [confirming, setConfirming] = useState(false);
   const insets = useSafeAreaInsets();
@@ -25,16 +28,19 @@ export default function Payment() {
 
   if (!valid || !stay || !room || !estimate) return <Page><Stack.Screen options={{ title: 'Payment' }} /><EmptyState title="Complete your booking details" body="Choose your stay and add the guest details before selecting payment." action="Review booking" onAction={() => router.replace('/review')} icon="user" /></Page>;
 
-  const confirmBooking = () => {
+  const confirmBooking = async () => {
     if (confirming) return;
     setConfirming(true);
-    const booking = createBooking({
-      stayId: stay.id, roomOptionId: room.id, checkIn: draft.checkIn, checkOut: draft.checkOut,
-      guests: draft.guests, nights: estimate.nights, subtotal: estimate.subtotal, guest: bookingGuest,
-    });
-    updateDraft({ stayId: null, roomOptionId: null });
-    router.dismissAll();
-    router.push({ pathname: '/booking/[id]', params: { id: booking.id, confirmed: '1' } });
+    setBookingError(null);
+    try {
+      const booking = await createBooking({ roomOptionId: room.id, checkIn: draft.checkIn, checkOut: draft.checkOut, guests: draft.guests, guest: bookingGuest });
+      updateDraft({ stayId: null, roomOptionId: null });
+      router.dismissAll();
+      router.push({ pathname: '/booking/[id]', params: { id: booking.id, confirmed: '1' } });
+    } catch (error) {
+      setBookingError(error instanceof Error ? error.message : 'Couldn’t confirm your booking. Please try again.');
+      setConfirming(false);
+    }
   };
 
   return <View style={{ flex: 1, backgroundColor: colors.white }}>
@@ -62,7 +68,8 @@ export default function Payment() {
     </ScrollView>
     <View style={{ paddingHorizontal: 20, paddingTop: 14, paddingBottom: Math.max(insets.bottom, 16), borderTopWidth: 1, borderColor: colors.stone, gap: 10 }}>
       <View style={{ flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between', gap: 12 }}><AppText style={{ fontSize: 12, color: colors.fern }}>Subtotal before taxes</AppText><AppText selectable style={{ fontFamily: fonts.bold, fontSize: 20 }}>{money(estimate.subtotal)}</AppText></View>
-      <Button label="Confirm booking" icon="check" disabled={confirming} onPress={confirmBooking} />
+      {bookingError ? <AppText selectable style={{ color: colors.error, fontSize: 12, lineHeight: 18 }}>{bookingError}</AppText> : null}
+      <Button label={confirming ? 'Confirming…' : 'Confirm booking'} icon={confirming ? null : 'check'} disabled={confirming} onPress={() => void confirmBooking()} />
       <AppText style={{ color: colors.fern, fontSize: 10, lineHeight: 16, textAlign: 'center' }}>You’ll see the exact address and directions right after booking.</AppText>
     </View>
   </View>;

@@ -1,5 +1,5 @@
 export type Mood = 'peaceful' | 'adventurous' | 'romantic' | 'nature';
-export type StayStyle = 'all' | 'villa' | 'cottage' | 'homestay';
+export type StayStyle = 'all' | 'villa' | 'cottage' | 'homestay' | 'resort' | 'hotel';
 export type GetawayDraft = {
   checkIn: string;
   checkOut: string;

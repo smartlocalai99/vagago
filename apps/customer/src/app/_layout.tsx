@@ -9,6 +9,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { EscapeProvider, useEscape } from '@/state/escape-context';
 import { LocationProvider, useLocationContext } from '@/state/location-context';
 import { BookingsProvider, useBookings } from '@/state/bookings-context';
+import { CatalogProvider, useCatalog } from '@/state/catalog-context';
 import { LaunchScreen } from '@/components/launch-screen';
 import { Icon } from '@/components/icon';
 import { colors, fonts } from '@/theme';
@@ -19,9 +20,10 @@ function AppStack({ fontsReady }: { fontsReady: boolean }) {
   const { ready, storageError, dismissStorageError } = useEscape();
   const { ready: locationReady, promptSeen } = useLocationContext();
   const { ready: bookingsReady } = useBookings();
+  const { ready: catalogReady } = useCatalog();
   const [launched, setLaunched] = useState(false);
   const finishLaunch = useCallback(() => setLaunched(true), []);
-  if (!launched) return <><StatusBar style="light" /><LaunchScreen ready={fontsReady && ready && locationReady && bookingsReady} onComplete={finishLaunch} /></>;
+  if (!launched) return <><StatusBar style="light" /><LaunchScreen ready={fontsReady && ready && locationReady && bookingsReady && catalogReady} onComplete={finishLaunch} /></>;
   return <View style={{ flex: 1, backgroundColor: colors.white }}>
     <StatusBar style="dark" />
     {storageError ? <Pressable accessibilityRole="button" accessibilityLabel="Dismiss storage warning" onPress={dismissStorageError} style={{ padding: 16, paddingTop: 48, backgroundColor: colors.softError }}><Text accessibilityRole="alert" style={{ fontFamily: fonts.medium, color: colors.error }}>{storageError} Tap to dismiss.</Text></Pressable> : null}
@@ -47,6 +49,6 @@ export default function RootLayout() {
     Manrope_600SemiBold: require('@expo-google-fonts/manrope/600SemiBold/Manrope_600SemiBold.ttf'),
     Manrope_700Bold: require('@expo-google-fonts/manrope/700Bold/Manrope_700Bold.ttf'),
   });
-  return <SafeAreaProvider><View style={{ flex: 1, backgroundColor: '#E9EDEA', alignItems: 'center' }}><View style={{ flex: 1, width: '100%', maxWidth: process.env.EXPO_OS === 'web' ? 480 : undefined }}><EscapeProvider><BookingsProvider><LocationProvider><AppStack fontsReady={loaded || Boolean(error)} /></LocationProvider></BookingsProvider></EscapeProvider></View></View></SafeAreaProvider>;
+  return <SafeAreaProvider><View style={{ flex: 1, backgroundColor: '#E9EDEA', alignItems: 'center' }}><View style={{ flex: 1, width: '100%', maxWidth: process.env.EXPO_OS === 'web' ? 480 : undefined }}><EscapeProvider><CatalogProvider><BookingsProvider><LocationProvider><AppStack fontsReady={loaded || Boolean(error)} /></LocationProvider></BookingsProvider></CatalogProvider></EscapeProvider></View></View></SafeAreaProvider>;
 }
 

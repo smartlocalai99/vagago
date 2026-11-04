@@ -56,7 +56,7 @@ test('valid past dates survive hydration so the user can revise their saved plan
 });
 
 test('invalid draft fields recover to defaults without treating repaired data as saved', () => {
-  for (const patch of [{ checkIn: '2026-02-30' }, { guests: 0 }, { nightlyBudget: Infinity }, { mood: 'unknown' }, { stayStyle: 'hotel' }, { query: 123 }, { stayId: {} }]) {
+  for (const patch of [{ checkIn: '2026-02-30' }, { guests: 0 }, { nightlyBudget: Infinity }, { mood: 'unknown' }, { stayStyle: 'castle' }, { query: 123 }, { stayId: {} }]) {
     const result = decodeEscapeDraft(JSON.stringify({ version: 1, draft: { ...defaults, ...patch } }), defaults, knownIds);
     assert.deepEqual(result, { draft: defaults, hasSavedDraft: false, recovered: true });
   }
