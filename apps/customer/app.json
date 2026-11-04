@@ -49,8 +49,8 @@
         {
           "locationWhenInUsePermission": "Allow VagaGo to use your location to show your approximate distance from Vagamon while you explore stays.",
           "locationAlwaysPermission": false,
-          "locationAlwaysAndWhenInUsePermission": false,
-          "motionUsagePermission": false,
+          "locationAlwaysAndWhenInUsePermission": "VagaGo only uses your location while the app is open, to show how far you are from stays and places in Vagamon.",
+          "motionUsagePermission": "VagaGo does not use motion data.",
           "isIosBackgroundLocationEnabled": false,
           "isAndroidBackgroundLocationEnabled": false,
           "isAndroidForegroundServiceEnabled": false,
