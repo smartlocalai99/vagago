@@ -1,12 +1,12 @@
 import { Pressable, Text, View } from 'react-native';
 import { Icon } from '@/components/icon';
 import { openDirections } from '@/components/directions';
-import { formatDrive, formatKm, nearbyAttractions } from '@/data/attractions';
+import { formatDrive, formatKm, nearbyAttractions, useAttractions } from '@/data/attractions';
 import { colors, fonts } from '@/theme';
 import type { Stay } from '@/types';
 
 export function NearbyPlaces({ stay, directions = false }: { stay: Stay; directions?: boolean }) {
-  const places = nearbyAttractions(stay.coordinates);
+  const places = nearbyAttractions(stay.coordinates, useAttractions());
   return <View style={{ gap: 6 }}>
     <Text accessibilityRole="header" style={{ fontFamily: fonts.bold, fontSize: 19, color: colors.ink }}>Places to visit nearby</Text>
     <Text style={{ fontFamily: fonts.regular, fontSize: 12, lineHeight: 18, color: colors.fern }}>Approximate road distance and drive time from {stay.name}.</Text>

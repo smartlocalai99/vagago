@@ -1,3 +1,5 @@
+import { useEffect, useState } from 'react';
+import { supabase } from '@/lib/supabase';
 import type { Coordinates } from '@/types';
 
 export type Attraction = { id: string; name: string; kind: string; coordinates: Coordinates };
@@ -30,8 +32,26 @@ function straightLineKm(from: Coordinates, to: Coordinates) {
 
 export type NearbyAttraction = Attraction & { roadKm: number; driveMinutes: number };
 
-export function nearbyAttractions(from: Coordinates): NearbyAttraction[] {
-  return attractions.map((attraction) => {
+let remoteAttractions: Promise<Attraction[] | null> | null = null;
+
+// Loads the admin-managed list once per launch; the bundled list covers offline use.
+export function useAttractions() {
+  const [list, setList] = useState(attractions);
+  useEffect(() => {
+    let mounted = true;
+    remoteAttractions ??= Promise.resolve(supabase.from('attractions').select('slug, name, kind, latitude, longitude').order('sort_order'))
+      .then(({ data, error }) => error || !data?.length ? null : data.map((row) => ({
+        id: row.slug, name: row.name, kind: row.kind, coordinates: { latitude: Number(row.latitude), longitude: Number(row.longitude) },
+      })))
+      .catch(() => null);
+    void remoteAttractions.then((rows) => { if (mounted && rows) setList(rows); });
+    return () => { mounted = false; };
+  }, []);
+  return list;
+}
+
+export function nearbyAttractions(from: Coordinates, list: Attraction[] = attractions): NearbyAttraction[] {
+  return list.map((attraction) => {
     const roadKm = Math.max(0.5, Math.round(straightLineKm(from, attraction.coordinates) * roadFactor * 2) / 2);
     return { ...attraction, roadKm, driveMinutes: Math.max(5, Math.round(roadKm / averageHillSpeedKmh * 60 / 5) * 5) };
   }).sort((a, b) => a.roadKm - b.roadKm);
