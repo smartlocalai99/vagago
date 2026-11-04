@@ -1,0 +1,20 @@
+{
+  "name": "vagago",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": ["apps/*", "packages/*"],
+  "scripts": {
+    "start": "npm run start --workspace @vagago/customer",
+    "web": "npm run web --workspace @vagago/customer",
+    "ios": "npm run ios --workspace @vagago/customer",
+    "android": "npm run android --workspace @vagago/customer",
+    "typecheck": "npm run typecheck --workspace @vagago/customer",
+    "test": "npm run test --workspace @vagago/domain && node --test apps/customer/src/state/storage-records.test.mjs",
+    "lint": "npm run lint --workspace @vagago/customer",
+    "export": "npm run export --workspace @vagago/customer"
+  },
+  "overrides": {
+    "react-native-reanimated": "4.5.1",
+    "react-native-worklets": "0.10.1"
+  }
+}

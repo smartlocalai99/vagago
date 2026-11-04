@@ -1,0 +1,52 @@
+import { useCallback, useState } from 'react';
+import { Pressable, Text, View } from 'react-native';
+import { Stack } from 'expo-router/stack';
+import { router } from 'expo-router';
+import { useFonts } from 'expo-font';
+import { StatusBar } from 'expo-status-bar';
+import * as SplashScreen from 'expo-splash-screen';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { EscapeProvider, useEscape } from '@/state/escape-context';
+import { LocationProvider, useLocationContext } from '@/state/location-context';
+import { BookingsProvider, useBookings } from '@/state/bookings-context';
+import { LaunchScreen } from '@/components/launch-screen';
+import { Icon } from '@/components/icon';
+import { colors, fonts } from '@/theme';
+
+if (process.env.EXPO_OS !== 'web') void SplashScreen.preventAutoHideAsync().catch(() => undefined);
+
+function AppStack({ fontsReady }: { fontsReady: boolean }) {
+  const { ready, storageError, dismissStorageError } = useEscape();
+  const { ready: locationReady, promptSeen } = useLocationContext();
+  const { ready: bookingsReady } = useBookings();
+  const [launched, setLaunched] = useState(false);
+  const finishLaunch = useCallback(() => setLaunched(true), []);
+  if (!launched) return <><StatusBar style="light" /><LaunchScreen ready={fontsReady && ready && locationReady && bookingsReady} onComplete={finishLaunch} /></>;
+  return <View style={{ flex: 1, backgroundColor: colors.white }}>
+    <StatusBar style="dark" />
+    {storageError ? <Pressable accessibilityRole="button" accessibilityLabel="Dismiss storage warning" onPress={dismissStorageError} style={{ padding: 16, paddingTop: 48, backgroundColor: colors.softError }}><Text accessibilityRole="alert" style={{ fontFamily: fonts.medium, color: colors.error }}>{storageError} Tap to dismiss.</Text></Pressable> : null}
+    <Stack screenOptions={{ headerStyle: { backgroundColor: colors.white }, headerTintColor: colors.ink, headerTitleStyle: { fontFamily: fonts.semibold, fontSize: 16 }, headerShadowVisible: false, contentStyle: { backgroundColor: colors.white }, headerBackButtonDisplayMode: 'minimal' }}>
+      <Stack.Protected guard={promptSeen}>
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="stay/[id]" options={{ title: 'Stay details' }} />
+        <Stack.Screen name="search" options={{ title: 'Search stays', presentation: 'modal', headerLeft: () => <Pressable accessibilityRole="button" accessibilityLabel="Close search" onPress={() => router.canGoBack() ? router.back() : router.replace('/')} style={{ minWidth: 44, minHeight: 44, justifyContent: 'center' }}><Icon name="close" size={22} /></Pressable> }} />
+        <Stack.Screen name="plan" options={{ headerShown: false }} />
+        <Stack.Screen name="review" options={{ title: 'Confirm your stay' }} />
+        <Stack.Screen name="payment" options={{ title: 'Payment' }} />
+        <Stack.Screen name="booking/[id]" options={{ title: 'Your booking' }} />
+      </Stack.Protected>
+      <Stack.Screen name="location" options={{ title: 'Your location', headerBackVisible: promptSeen, gestureEnabled: promptSeen }} />
+    </Stack>
+  </View>;
+}
+
+export default function RootLayout() {
+  const [loaded, error] = useFonts({
+    Manrope_400Regular: require('@expo-google-fonts/manrope/400Regular/Manrope_400Regular.ttf'),
+    Manrope_500Medium: require('@expo-google-fonts/manrope/500Medium/Manrope_500Medium.ttf'),
+    Manrope_600SemiBold: require('@expo-google-fonts/manrope/600SemiBold/Manrope_600SemiBold.ttf'),
+    Manrope_700Bold: require('@expo-google-fonts/manrope/700Bold/Manrope_700Bold.ttf'),
+  });
+  return <SafeAreaProvider><View style={{ flex: 1, backgroundColor: '#E9EDEA', alignItems: 'center' }}><View style={{ flex: 1, width: '100%', maxWidth: process.env.EXPO_OS === 'web' ? 480 : undefined }}><EscapeProvider><BookingsProvider><LocationProvider><AppStack fontsReady={loaded || Boolean(error)} /></LocationProvider></BookingsProvider></EscapeProvider></View></View></SafeAreaProvider>;
+}
+
