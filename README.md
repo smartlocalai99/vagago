@@ -71,6 +71,12 @@ docs/                      Product plan, design, research, and future architectu
 
 The shared package is available to workspace clients as `@vagago/domain`. Its current estimates and filters are for the preview only; future booking APIs must calculate authoritative prices and enforce inventory on the server.
 
+## Database (Supabase)
+
+`supabase/migrations/` holds the shared schema for the customer app, hotel app and admin dashboard: profiles, platform admins, properties with private exact locations, hotel team memberships and invitations, room types, daily rates, inventory blocks, photos, amenities, offers, attractions, reservations with per-night prices, payments, reviews and an audit log. Row level security limits customers to their own bookings, hotel teams to their own properties, and publishing to admins. Bookings go through `create_reservation`, which prices the stay and checks availability in the database; `cancel_reservation`, `update_reservation_status`, `accept_property_invitation` and `reservation_location` cover the rest of the lifecycle. Money is stored in paise.
+
+`supabase/seed.sql` adds the three fictional demo stays for local development only. To make someone an admin, insert their auth user id into `platform_admins` from the SQL editor. The customer app is not yet connected to the database; it still stores bookings on the device.
+
 ## Later connected milestone
 
 After the customer interface is approved and backend work is requested, build one complete workflow across the three products: an admin onboards a hotel and invites its manager; the manager uses the separate hotel app to enter rooms, rates, and availability; the admin publishes the listing; a customer receives a server quote and completes a reservation through a verified payment flow.
