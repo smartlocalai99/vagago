@@ -2,12 +2,14 @@ import Link from 'next/link';
 import { Shell } from '@/components/admin/shell';
 import { BookingRow } from '@/components/admin/booking-row';
 import { Empty, Loading, Section } from '@/components/admin/ui';
-import { useProperties, useReservations } from '@/lib/data';
+import { useProperties, useReservations, useReviews } from '@/lib/data';
 import { fullDate, todayInIndia } from '@/lib/format';
 
 export default function Home() {
   const { data: bookings, isLoading } = useReservations();
   const { data: hotels } = useProperties();
+  const { data: reviews } = useReviews();
+  const waitingReviews = reviews?.filter((review) => review.status === 'pending').length ?? 0;
   const today = todayInIndia();
   const weekAhead = todayInIndia(7);
   const hotelName = (id: string) => hotels?.find((hotel) => hotel.id === id)?.name;
@@ -40,6 +42,10 @@ export default function Home() {
     {pending.length ? <Link href="/admin/hotels/?filter=draft" className="mx-4 mt-4 flex items-center justify-between rounded-xl bg-warn-soft px-4 py-3 text-[14px] text-warn">
       <span><b>{pending.length}</b> {pending.length === 1 ? 'hotel is' : 'hotels are'} not live yet</span><span className="font-bold">Finish</span>
     </Link> : null}
+
+    <Link href="/admin/reviews/" className="mx-4 mt-3 flex items-center justify-between rounded-xl border border-line px-4 py-3 text-[14px]">
+      <span>{waitingReviews ? <><b>{waitingReviews}</b> guest {waitingReviews === 1 ? 'review is' : 'reviews are'} waiting</> : 'Guest reviews'}</span><span className="font-bold text-forest">Open</span>
+    </Link>
 
     <Section title="Arriving today">
       {isLoading ? <Loading /> : arrivals.length ? <div className="border-t border-line">{arrivals.map((booking) => <BookingRow key={booking.id} booking={booking} hotel={hotelName(booking.property_id)} />)}</div>

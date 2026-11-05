@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { Icon } from '@/components/icons';
 import { SiteLayout } from '@/components/site/layout';
+import { ReviewForm } from '@/components/site/review-form';
 import { TripStatus } from '@/components/site/trip-status';
 import { fullDate, money, todayInIndia } from '@/lib/format';
 import { guest, hasGuestSession, tripColumns, type Trip } from '@/lib/guest';
@@ -111,6 +112,8 @@ export default function TripPage() {
           </a></li>)}
         </ul>
       </section> : null}
+
+      {trip.status === 'completed' ? <ReviewForm trip={trip} /> : null}
 
       {trip.status === 'confirmed' && trip.check_in >= todayInIndia() ? <div className="mt-10 text-center">
         {failure ? <p role="alert" className="mb-3 text-[15px] text-danger">{failure}</p> : null}

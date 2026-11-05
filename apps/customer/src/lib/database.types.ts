@@ -702,7 +702,11 @@ export type Database = {
       }
       reviews: {
         Row: {
+          accommodation_rating: number | null
+          author_name: string | null
+          cleanliness_rating: number | null
           comment: string | null
+          connectivity_rating: number | null
           created_at: string
           customer_id: string
           id: string
@@ -713,7 +717,11 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          accommodation_rating?: number | null
+          author_name?: string | null
+          cleanliness_rating?: number | null
           comment?: string | null
+          connectivity_rating?: number | null
           created_at?: string
           customer_id: string
           id?: string
@@ -724,7 +732,11 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          accommodation_rating?: number | null
+          author_name?: string | null
+          cleanliness_rating?: number | null
           comment?: string | null
+          connectivity_rating?: number | null
           created_at?: string
           customer_id?: string
           id?: string

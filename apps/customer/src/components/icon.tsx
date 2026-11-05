@@ -1,7 +1,7 @@
 import Svg, { Circle, Path, Polyline } from 'react-native-svg';
 import { colors } from '@/theme';
 
-export type IconName = 'arrow' | 'back' | 'heart' | 'leaf' | 'sun' | 'moon' | 'mountain' | 'compass' | 'calendar' | 'users' | 'search' | 'close' | 'check' | 'pin' | 'plus' | 'minus' | 'sliders' | 'home' | 'coffee' | 'chevron' | 'user' | 'suitcase' | 'sort' | 'bed' | 'info' | 'lock' | 'tag' | 'flame' | 'play' | 'pause' | 'shield' | 'credit-card' | 'mail' | 'phone' | 'ticket' | 'navigation' | 'car' | 'share' | 'image' | 'cash' | 'edit';
+export type IconName = 'arrow' | 'back' | 'heart' | 'leaf' | 'sun' | 'moon' | 'mountain' | 'compass' | 'calendar' | 'users' | 'search' | 'close' | 'check' | 'pin' | 'plus' | 'minus' | 'sliders' | 'home' | 'coffee' | 'chevron' | 'user' | 'suitcase' | 'sort' | 'bed' | 'info' | 'lock' | 'tag' | 'flame' | 'play' | 'pause' | 'shield' | 'credit-card' | 'mail' | 'phone' | 'ticket' | 'navigation' | 'car' | 'share' | 'image' | 'cash' | 'edit' | 'star';
 export function Icon({ name, size = 22, color = colors.pine, filled = false }: { name: IconName; size?: number; color?: string; filled?: boolean }) {
   return <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
     {name === 'arrow' && <><Path d="M4 12h15M13 5l7 7-7 7" /></>}
@@ -44,6 +44,7 @@ export function Icon({ name, size = 22, color = colors.pine, filled = false }: {
     {name === 'image' && <><Path d="M3 4h18v16H3z" /><Circle cx="8.5" cy="9" r="1.8" /><Path d="m21 16-5-5-9 9" /></>}
     {name === 'cash' && <><Path d="M2 6h20v12H2z" /><Circle cx="12" cy="12" r="2.6" /><Path d="M6 9v.01M18 15v.01" /></>}
     {name === 'edit' && <><Path d="M11 4H4v16h16v-7" /><Path d="M18.4 2.6a2 2 0 0 1 3 3L12 15l-4 1 1-4 9.4-9.4Z" /></>}
+    {name === 'star' && <Path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1 6.2L12 17.3 6.5 20.2l1-6.2L3 9.6l6.2-.9L12 3Z" fill={filled ? color : 'none'} />}
     {name === 'ticket' && <><Path d="M3 6h18v4a2 2 0 0 0 0 4v4H3v-4a2 2 0 0 0 0-4V6Z" /><Path d="M15 7v2m0 2v2m0 2v2" /></>}
   </Svg>;
 }

@@ -107,3 +107,19 @@ export async function fetchAmenityHighlights(listings: Listing[], limit = 5) {
   return data.map((row) => ({ name: row.name, art: amenityArt(row.name, row.icon), stays: listings.filter((stay) => stay.amenities.includes(row.name)).length }))
     .filter((row) => row.stays > 0).sort((a, b) => b.stays - a.stays || a.name.localeCompare(b.name)).slice(0, limit);
 }
+
+export type GuestReview = {
+  id: string; comment: string; author: string; stay: string | null;
+  accommodation: number | null; connectivity: number | null; cleanliness: number | null; rating: number;
+};
+
+// The latest reviews an admin has published (guests write them after a completed stay).
+export async function fetchPublishedReviews(limit = 8): Promise<GuestReview[]> {
+  const { data, error } = await db().from('reviews')
+    .select('id, rating, comment, author_name, accommodation_rating, connectivity_rating, cleanliness_rating, properties (name)')
+    .eq('status', 'published').not('comment', 'is', null).order('created_at', { ascending: false }).limit(limit);
+  if (error) throw new Error(error.message);
+  return (data as unknown as { id: string; rating: number; comment: string; author_name: string | null; accommodation_rating: number | null; connectivity_rating: number | null; cleanliness_rating: number | null; properties: { name: string } | null }[])
+    .map((row) => ({ id: row.id, comment: row.comment, author: row.author_name ?? 'VagaGo guest', stay: row.properties?.name ?? null,
+      accommodation: row.accommodation_rating, connectivity: row.connectivity_rating, cleanliness: row.cleanliness_rating, rating: row.rating }));
+}

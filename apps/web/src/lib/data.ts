@@ -190,3 +190,18 @@ export async function setReservationStatus(id: string, status: ReservationStatus
 export async function cancelReservation(id: string, reason: string) {
   upsertReservation(unwrap(await supabase.rpc('cancel_reservation', { p_reservation_id: id, p_reason: reason })) as Reservation);
 }
+
+// ---------- Reviews ----------
+export type ReviewRow = Pick<Tables['reviews']['Row'], 'id' | 'status' | 'rating' | 'comment' | 'author_name' | 'accommodation_rating' | 'connectivity_rating' | 'cleanliness_rating' | 'created_at'>
+  & { properties: { name: string } | null };
+
+export function useReviews() {
+  return useSWR('reviews', async () => unwrap(await supabase.from('reviews')
+    .select('id, status, rating, comment, author_name, accommodation_rating, connectivity_rating, cleanliness_rating, created_at, properties (name)')
+    .order('created_at', { ascending: false }).limit(200)) as unknown as ReviewRow[]);
+}
+
+export async function setReviewStatus(id: string, status: Tables['reviews']['Row']['status']) {
+  unwrap(await supabase.from('reviews').update({ status }).eq('id', id));
+  await mutate<ReviewRow[]>('reviews', (list) => list?.map((item) => item.id === id ? { ...item, status } : item), { revalidate: false });
+}

@@ -3,7 +3,8 @@ import { Icon, type IconName } from '@/components/icons';
 import { Logo, navLinks } from '@/components/site/layout';
 import { SearchForm } from '@/components/site/stay-parts';
 import { money } from '@/lib/format';
-import type { Listing, Place } from '@/lib/listings';
+import type { GuestReview, Listing, Place } from '@/lib/listings';
+import { GuestVoices } from '@/components/site/guest-voices';
 import { placePhoto, type AmenityHighlight } from '@/lib/places';
 import { defaultTrip, formatDrive, formatKm, type nearby } from '@/lib/trip';
 
@@ -25,15 +26,7 @@ function HeroNav() {
   </div>;
 }
 
-function Stat({ icon, value, label }: { icon: IconName; value: string; label: string }) {
-  return <div className="flex flex-col items-center text-center">
-    <span className="grid size-10 place-items-center rounded-full bg-forest-soft text-forest"><Icon name={icon} size={19} /></span>
-    <span className="mt-2 text-[22px] leading-none font-extrabold tabular-nums">{value}</span>
-    <span className="mt-1 text-[12px] leading-4 text-muted">{label}</span>
-  </div>;
-}
-
-export function Hero({ featured, total, placeCount, thumbs }: { featured: Listing | null; total: number; placeCount: number; thumbs: string[] }) {
+export function Hero({ featured, reviews, thumbs }: { featured: Listing | null; reviews: GuestReview[]; thumbs: string[] }) {
   return <section className="p-2.5 sm:p-4">
     <div className="relative overflow-hidden rounded-[28px] sm:rounded-[36px]">
       <img src="/images/hero.jpg" alt="Tea gardens and mist over the hills around Vagamon" fetchPriority="high" className="absolute inset-0 size-full object-cover" />
@@ -43,17 +36,16 @@ export function Hero({ featured, total, placeCount, thumbs }: { featured: Listin
         <HeroNav />
         <div className="max-w-[640px] sm:pl-2">
           <p className="flex items-center gap-1.5 text-[15px] font-semibold text-ink/75"><Icon name="pin" size={17} />Vagamon, Kerala</p>
-          <h1 className="mt-4 font-display text-[54px] leading-[0.95] font-semibold tracking-[-0.01em] text-ink sm:text-[84px]">Affordable stays<br /><span className="text-tea">at the best price</span></h1>
+          <h1 className="mt-4 font-display text-[54px] leading-[0.95] font-semibold tracking-[-0.01em] text-ink sm:text-[84px]">Affordable stays<br /><span className="text-forest">at the best price</span></h1>
           <p className="mt-5 max-w-md text-[17px] leading-7 text-ink/80">Cottages, homestays and villas in the Vagamon hills. Book in a minute and pay when you arrive.</p>
           <div className="mt-8 flex flex-wrap items-center gap-5">
             <Link href="/stays/" className="flex items-center gap-3 rounded-full bg-ink py-2 pr-2 pl-6 text-[15px] font-bold text-white">Explore stays<span className="grid size-9 place-items-center rounded-full bg-white/15"><Icon name="chevron" size={17} /></span></Link>
-            <a href="#how-it-works" className="flex items-center gap-3 text-[15px] font-bold text-ink"><span className="grid size-12 place-items-center rounded-full border border-ink/15 bg-white/70 backdrop-blur"><Icon name="chevron" size={17} className="rotate-90" /></span>How booking works</a>
           </div>
         </div>
 
         <div className="mt-auto space-y-4">
           <div className="mx-auto max-w-[1040px]"><SearchForm trip={defaultTrip()} variant="glass" /></div>
-          <div className="grid gap-4 lg:grid-cols-[1fr_1.55fr_1fr]">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-[0.95fr_1.9fr_0.95fr] [&>*]:min-w-0">
             {featured ? <Link href={`/stays/${featured.slug}/`} className="group flex gap-3 rounded-[26px] border border-white/70 bg-white/85 p-3 backdrop-blur-xl lg:flex-col">
               <div className="relative h-28 w-36 shrink-0 overflow-hidden rounded-[18px] bg-surface lg:h-36 lg:w-full">
                 {featured.photos[0] ? <img src={featured.photos[0].full} srcSet={`${featured.photos[0].thumb} 480w, ${featured.photos[0].full} 1600w`} sizes="340px" alt="" className="size-full object-cover transition-transform duration-500 group-hover:scale-[1.04]" /> : null}
@@ -69,21 +61,7 @@ export function Hero({ featured, total, placeCount, thumbs }: { featured: Listin
               </div>
             </Link> : <div />}
 
-            <div className="flex flex-col justify-between gap-5 rounded-[26px] border border-white/70 bg-white/85 p-5 backdrop-blur-xl">
-              <div className="grid grid-cols-4 gap-2">
-                <Stat icon="home" value={String(total)} label={total === 1 ? 'Stay to choose' : 'Stays to choose'} />
-                <Stat icon="pin" value={String(placeCount)} label="Places to visit" />
-                <Stat icon="cash" value="₹0" label="Paid when booking" />
-                <Stat icon="calendar" value="Free" label="Cancellation" />
-              </div>
-              <div className="flex items-center gap-4 border-t border-line pt-4">
-                <div className="flex -space-x-3">
-                  {thumbs.map((src) => <img key={src} src={src} alt="" className="size-10 rounded-full border-2 border-white object-cover" />)}
-                  <Link href="/stays/" aria-label="See all stays" className="grid size-10 place-items-center rounded-full border-2 border-white bg-forest text-white"><Icon name="plus" size={18} /></Link>
-                </div>
-                <p className="text-[14px] leading-5 text-ink/80">Cottages, homestays and villas. <span className="font-bold text-ink">Nothing to pay until you arrive.</span></p>
-              </div>
-            </div>
+            <GuestVoices reviews={reviews} thumbs={thumbs} />
 
             <a href="#places" className="group relative hidden min-h-[200px] overflow-hidden rounded-[26px] lg:block">
               <img src="/places/vagamon-meadows.jpg" alt="" className="absolute inset-0 size-full object-cover transition-transform duration-700 group-hover:scale-[1.05]" />
@@ -118,11 +96,20 @@ export function WhyVagaGo({ amenities }: { amenities: AmenityHighlight[] }) {
     {amenities.length ? <>
       <p className="mt-10 text-[16px] text-muted">Popular at our stays</p>
       <ul className="-mx-4 mt-3 flex snap-x gap-4 overflow-x-auto px-4 pb-2 sm:mx-0 sm:grid sm:grid-cols-3 sm:overflow-visible sm:px-0 lg:grid-cols-5">
-        {amenities.map((item) => <li key={item.name} className="flex aspect-square w-[62%] shrink-0 snap-start flex-col items-center justify-center rounded-[28px] bg-tile p-4 text-center sm:w-auto">
-          <img src={item.art} alt="" className="w-[78%]" loading="lazy" />
-          <p className="mt-3 text-[18px] leading-6 font-bold">{item.name}</p>
-          <p className="text-[13px] text-muted">At {item.stays} {item.stays === 1 ? 'stay' : 'stays'}</p>
-        </li>)}
+        {amenities.map((item) => item.art.photo
+          ? <li key={item.name} className="group relative aspect-square w-[62%] shrink-0 snap-start overflow-hidden rounded-[28px] bg-tile sm:w-auto">
+            <img src={item.art.src} alt={item.name} loading="lazy" className="absolute inset-0 size-full object-cover transition-transform duration-700 group-hover:scale-[1.06]" />
+            <div className="absolute inset-0 bg-[linear-gradient(to_top,rgba(0,0,0,0.72),rgba(0,0,0,0.05)_55%)]" />
+            <div className="absolute inset-x-4 bottom-4 text-white">
+              <p className="text-[19px] leading-6 font-bold">{item.name}</p>
+              <p className="text-[13px] text-white/80">At {item.stays} {item.stays === 1 ? 'stay' : 'stays'}</p>
+            </div>
+          </li>
+          : <li key={item.name} className="flex aspect-square w-[62%] shrink-0 snap-start flex-col items-center justify-center rounded-[28px] bg-tile p-4 text-center sm:w-auto">
+            <img src={item.art.src} alt="" className="w-[78%]" loading="lazy" />
+            <p className="mt-3 text-[18px] leading-6 font-bold">{item.name}</p>
+            <p className="text-[13px] text-muted">At {item.stays} {item.stays === 1 ? 'stay' : 'stays'}</p>
+          </li>)}
       </ul>
     </> : null}
   </section>;

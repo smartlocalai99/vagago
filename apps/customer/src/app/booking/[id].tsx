@@ -8,6 +8,7 @@ import { formatDate } from '@/components/escape-summary';
 import { ExactLocation } from '@/components/exact-location';
 import { Icon } from '@/components/icon';
 import { NearbyPlaces } from '@/components/nearby-places';
+import { ReviewForm } from '@/components/review-form';
 import { money } from '@/data/stays';
 import { useBookings, type ExactAddress } from '@/state/bookings-context';
 import { useStays } from '@/state/catalog-context';
@@ -86,6 +87,7 @@ export default function BookingDetails() {
         </View>
         <AppText style={{ fontSize: 11, color: colors.fern }}>Plus taxes and fees charged by the property.</AppText>
       </View>
+      {booking.status === 'completed' ? <ReviewForm booking={booking} /> : null}
       {active ? <ExactLocation address={address} /> : null}
       {stay ? <NearbyPlaces stay={stay} directions={active} /> : null}
       {booking.status === 'confirmed' ? <Pressable accessibilityRole="button" disabled={cancelling} onPress={confirmCancel} style={{ minHeight: 44, alignItems: 'center', justifyContent: 'center', opacity: cancelling ? 0.5 : 1 }}>

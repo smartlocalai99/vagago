@@ -1,0 +1,42 @@
+{
+  "campfire": {
+    "label": "Campfire",
+    "title": "Campsite 38 in Bowron Lake Provincial Park at night (DSCF3026).jpg",
+    "author": "Trougnouf",
+    "license": "CC BY 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Campsite_38_in_Bowron_Lake_Provincial_Park_at_night_(DSCF3026).jpg"
+  },
+  "view": {
+    "label": "Balcony or deck",
+    "title": "Bergtocht van Guarda via Ardez en Ftan naar Scuol. 20-09-2019. (d.j.b) 06.jpg",
+    "author": "Dominicus Johannes Bergsma",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Bergtocht_van_Guarda_via_Ardez_en_Ftan_naar_Scuol._20-09-2019._(d.j.b)_06.jpg"
+  },
+  "breakfast": {
+    "label": "Breakfast",
+    "title": "Rice Puttu with Gram Curry.jpg",
+    "author": "Anto Paul",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Rice_Puttu_with_Gram_Curry.jpg"
+  },
+  "parking": {
+    "label": "Free parking",
+    "title": "Hehuan Lodge overlook.jpg",
+    "author": "abon",
+    "license": "CC BY-SA 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Hehuan_Lodge_overlook.jpg"
+  },
+  "wifi": {
+    "label": "Wi-Fi",
+    "title": "Laptop, coffee, fireplace, bliss!",
+    "author": "PLeia2",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "source": "https://www.flickr.com/photos/64684255@N00/15185128597"
+  }
+}

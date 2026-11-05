@@ -3,21 +3,21 @@ import Link from 'next/link';
 import { Faq, Hero, PlacesGrid, WhyVagaGo } from '@/components/site/home-sections';
 import { SiteLayout } from '@/components/site/layout';
 import { StayCard } from '@/components/site/stay-parts';
-import { discountPercent, fetchAmenityHighlights, fetchListings, fetchPlaces, type Listing, type Place } from '@/lib/listings';
+import { discountPercent, fetchAmenityHighlights, fetchListings, fetchPlaces, fetchPublishedReviews, type GuestReview, type Listing, type Place } from '@/lib/listings';
 import type { AmenityHighlight } from '@/lib/places';
 import { nearby, vagamonTown } from '@/lib/trip';
 
-type Props = { stays: Listing[]; places: Place[]; total: number; amenities: AmenityHighlight[] };
+type Props = { stays: Listing[]; places: Place[]; total: number; amenities: AmenityHighlight[]; reviews: GuestReview[] };
 
 // Rebuilt in the background at most every five minutes, whatever the traffic.
 export const getStaticProps: GetStaticProps<Props> = async () => {
   try {
     const [listings, places] = await Promise.all([fetchListings(), fetchPlaces()]);
     const best = [...listings].sort((a, b) => discountPercent(b.rate, b.compareAt) - discountPercent(a.rate, a.compareAt) || a.rate - b.rate);
-    const amenities = await fetchAmenityHighlights(listings).catch(() => []);
-    return { props: { stays: best.slice(0, 6), places, total: listings.length, amenities }, revalidate: 300 };
+    const [amenities, reviews] = await Promise.all([fetchAmenityHighlights(listings).catch(() => []), fetchPublishedReviews().catch(() => [])]);
+    return { props: { stays: best.slice(0, 6), places, total: listings.length, amenities, reviews }, revalidate: 300 };
   } catch {
-    return { props: { stays: [], places: [], total: 0, amenities: [] }, revalidate: 60 };
+    return { props: { stays: [], places: [], total: 0, amenities: [], reviews: [] }, revalidate: 60 };
   }
 };
 
@@ -27,10 +27,10 @@ const steps = [
   { title: 'Get directions', body: 'See the exact address, directions and the host’s number straight away.' },
 ];
 
-export default function Home({ stays, places, total, amenities }: Props) {
+export default function Home({ stays, places, total, amenities, reviews }: Props) {
   const fromTown = nearby(vagamonTown, places);
   return <SiteLayout title="VagaGo" header={false} description="Book cottages, homestays and villas in Vagamon, Kerala at the best price. No advance payment: pay at the stay.">
-    <Hero featured={stays[0] ?? null} total={total} placeCount={places.length} thumbs={stays.slice(0, 3).flatMap((stay) => stay.photos[0] ? [stay.photos[0].thumb] : [])} />
+    <Hero featured={stays[0] ?? null} reviews={reviews} thumbs={stays.slice(0, 3).flatMap((stay) => stay.photos[0] ? [stay.photos[0].thumb] : [])} />
 
     <WhyVagaGo amenities={amenities} />
 
