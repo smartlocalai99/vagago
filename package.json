@@ -11,7 +11,8 @@
     "typecheck": "npm run typecheck --workspace @vagago/customer",
     "test": "npm run test --workspace @vagago/domain && node --test apps/customer/src/state/storage-records.test.mjs",
     "lint": "npm run lint --workspace @vagago/customer",
-    "export": "npm run export --workspace @vagago/customer"
+    "export": "npm run export --workspace @vagago/customer",
+    "site": "npm run dev --workspace @vagago/web"
   },
   "overrides": {
     "react-native-reanimated": "4.5.1",

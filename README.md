@@ -15,7 +15,7 @@ A Vagamon-only booking platform, beginning with a native React Native + Expo cus
 - An animated splash using the provided logo, plus an optional first-launch foreground location request. Profile shows the approximate distance to Vagamon when location is shared.
 - Shared JavaScript rules for date validation, filtering, and illustrative accommodation subtotals.
 
-**This is a design preview, not an operating booking service.** The three stays and comparison prices are fictional examples with representative photography. Prices exclude taxes and fees and do not imply availability. Checkout charges nothing, and confirmed bookings are stored only on the guest’s phone: no property is notified and no inventory is held. Profile does not yet provide sign-in. Database/backend work is deferred at the user's request; authentication, live inventory, payments, reservations, refunds and notifications are not connected. The admin dashboard and hotel management app remain planned products.
+**Status:** the customer app, the website and the admin dashboard share one Supabase project for listings, availability and reservations. The three demo stays are fictional examples with representative photography. Guests pay at the stay; online payments, refunds and notifications are not connected yet, and the hotel management app is still planned.
 
 ## Run the customer app
 
@@ -71,9 +71,13 @@ docs/                      Product plan, design, research, and future architectu
 
 The shared package is available to workspace clients as `@vagago/domain`. Its current estimates and filters are for the preview only; future booking APIs must calculate authoritative prices and enforce inventory on the server.
 
-## Admin dashboard (`apps/admin`)
+## Website and admin dashboard (`apps/web`)
 
-A phone-sized Next.js (Pages Router) web app for VagaGo staff, installable with **Add to Home Screen**. It is a static export that talks to Supabase from the browser, so any static host works.
+One Next.js (Pages Router) site holds the public booking website and, under `/admin`, the staff dashboard.
+
+**Public website** (`/`): home with search, "Stays at the best price" and places to visit with distances; `/stays` results with sort; `/stays/<slug>` with photo gallery, live availability for the chosen dates, room choice, nearby places and stay rules; `/book` checkout (name and mobile, pay at the stay); `/trips` and `/trips/<id>` for the guest's bookings, where the exact address, directions and the property's number appear after booking. Guests book without an account, exactly like the app (anonymous sign-in, which must be enabled in Supabase). Listing pages are pre-rendered and refreshed in the background every five minutes, so new or edited hotels appear without a redeploy and visitors never hit the database directly for browsing.
+
+**Admin dashboard** (`/admin`): not linked anywhere on the site, sent with `X-Robots-Tag: noindex`, and protected by sign-in. It is phone-sized and installable with **Add to Home Screen** from `/admin/` (manifest and service worker are scoped to `/admin/`).
 
 - **Sign in:** username + 4-digit PIN. Accounts live in Supabase Auth as `<username>@admin.vagago.app` with the PIN expanded to `vagago-admin-pin-<PIN>`, and must be listed in `platform_admins`.
 - **Home:** arrivals today, guests in-house, next 7 days, live hotels, latest bookings.
@@ -82,14 +86,16 @@ A phone-sized Next.js (Pages Router) web app for VagaGo staff, installable with 
 - **Photos:** resized in the browser to 1600px plus a 480px thumbnail (`<id>.thumb.webp`), then uploaded to the public `property-photos` bucket under `<property_id>/`.
 
 ```sh
-npm run dev --workspace @vagago/admin      # http://localhost:3001
-npm run build --workspace @vagago/admin    # static site in apps/admin/out
-npx vercel login && npm run deploy --workspace @vagago/admin
+npm run dev --workspace @vagago/web      # http://localhost:3001 (admin at /admin/)
+npm run build --workspace @vagago/web
 ```
+
+**Hosting on Vercel:** import the GitHub repository at vercel.com/new and set **Root Directory** to `apps/web` (framework: Next.js). No environment variables are required; the public Supabase URL and publishable key have defaults in `next.config.mjs`. Every push to `main` then redeploys the site.
 
 ### Keeping database traffic low
 
 - Customer app: one request loads every published listing with rooms, photos and amenities; it is cached on the device and refreshed after 10 minutes or on pull-to-refresh. Attractions load once per launch. Bookings refresh at most once a minute, exact addresses are fetched once per booking, and photos use the device image cache with small thumbnails in lists.
+- Website: listing pages are cached HTML regenerated at most every five minutes; availability is checked once per change of dates or room.
 - Admin: one request per list (SWR, no refetch on focus), saves patch the cache instead of reloading, and realtime keeps bookings current.
 
 ## Database (Supabase)
@@ -106,7 +112,7 @@ The admin dashboard will use Next.js, JavaScript, and Tailwind CSS. The hotel ap
 
 Backend/authentication, hosting, payments, and notification providers remain to be selected and configured. No backend credentials are needed to run this preview. Real listing content and image rights, merchant onboarding, policy/tax requirements, and developer accounts are dependencies for live operation and distribution.
 
-Legacy wishlist/plan storage is no longer read or written by the live app. Existing records are left untouched, and their compatibility helpers remain tested. Location coordinates are not persisted or uploaded. Confirmed bookings, including guest contact details, are stored locally under `@vagago/bookings:v1` and never uploaded.
+Legacy wishlist/plan storage is no longer read or written by the live app. Existing records are left untouched, and their compatibility helpers remain tested. The guest's device location is not persisted or uploaded. Bookings are stored in Supabase and cached on the device.
 
 ## Project references
 
