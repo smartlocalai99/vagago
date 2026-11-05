@@ -3,8 +3,10 @@ import { createClient } from '@supabase/supabase-js';
 import { AppState } from 'react-native';
 import type { Database } from './database.types';
 
-const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL ?? '';
-const supabasePublishableKey = process.env.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? '';
+// Public client values (the publishable key is meant to ship in apps; RLS protects the data).
+// The defaults keep every build and over-the-air update working even when no env file is loaded.
+const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL || 'https://rjdnsyhvemywztlngqvs.supabase.co';
+const supabasePublishableKey = process.env.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY || 'sb_publishable_mg5VGqHTS1DW-_DkgdxpOQ_ZNdx3w6r';
 
 export const supabase = createClient<Database>(supabaseUrl, supabasePublishableKey, {
   auth: {
