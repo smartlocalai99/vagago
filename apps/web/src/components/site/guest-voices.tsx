@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { Icon } from '@/components/icons';
+import { sampleReviews } from '@/data/sample-reviews';
 import type { GuestReview } from '@/lib/listings';
 
 type Slide = { text: string; author?: string; scores: (number | null)[] };
@@ -68,8 +69,11 @@ function Stars({ value, delay }: { value: number | null; delay: number }) {
   </span>;
 }
 
-export function GuestVoices({ reviews, thumbs }: { reviews: GuestReview[]; thumbs: string[] }) {
+export function GuestVoices({ reviews: published, thumbs }: { reviews: GuestReview[]; thumbs: string[] }) {
   const reduced = usePrefersReducedMotion();
+  // Real published reviews take over from the demo samples automatically.
+  const sample = published.length === 0 && sampleReviews.length > 0;
+  const reviews = sample ? sampleReviews : published;
   const live = reviews.length > 0;
   const slides: Slide[] = live
     ? reviews.map((review) => ({ text: review.comment, author: `${review.author}${review.stay ? `, stayed at ${review.stay}` : ''}`, scores: [review.accommodation, review.connectivity, review.cleanliness] }))
@@ -80,7 +84,7 @@ export function GuestVoices({ reviews, thumbs }: { reviews: GuestReview[]; thumb
   return <div className="flex flex-col justify-between gap-4 rounded-[26px] border border-white/70 bg-white/85 p-5 backdrop-blur-xl">
     <div className="grid gap-5 sm:grid-cols-[1.12fr_1fr] sm:gap-0 sm:divide-x sm:divide-line">
       <div className="min-w-0 sm:pr-5" aria-live="polite">
-        <p className="text-[13px] font-bold text-muted">{live ? 'What guests say' : 'Booking with VagaGo'}</p>
+        <p className="flex items-center gap-2 text-[13px] font-bold text-muted">{live ? 'What guests say' : 'Booking with VagaGo'}{sample ? <span className="rounded-full bg-surface px-2 py-0.5 text-[10px] font-semibold text-muted">Sample reviews</span> : null}</p>
         <p className="mt-2 min-h-[84px] font-display text-[22px] leading-[1.25] font-semibold text-ink">
           <span className="text-forest">“</span>{typed}{!done ? <span className="ml-0.5 inline-block h-[0.95em] w-[2px] translate-y-[3px] animate-pulse bg-forest" /> : <span className="text-forest">”</span>}
         </p>
