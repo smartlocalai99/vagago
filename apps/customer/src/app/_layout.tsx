@@ -10,7 +10,7 @@ import { EscapeProvider, useEscape } from '@/state/escape-context';
 import { LocationProvider, useLocationContext } from '@/state/location-context';
 import { BookingsProvider, useBookings } from '@/state/bookings-context';
 import { CatalogProvider, useCatalog } from '@/state/catalog-context';
-import { LaunchScreen } from '@/components/launch-screen';
+import { brandGreen, LaunchScreen } from '@/components/launch-screen';
 import { Icon } from '@/components/icon';
 import { colors, fonts } from '@/theme';
 
@@ -23,14 +23,23 @@ function AppStack({ fontsReady }: { fontsReady: boolean }) {
   const { ready: catalogReady } = useCatalog();
   const [launched, setLaunched] = useState(false);
   const finishLaunch = useCallback(() => setLaunched(true), []);
-  if (!launched) return <><StatusBar style="light" /><LaunchScreen ready={fontsReady && ready && locationReady && bookingsReady && catalogReady} onComplete={finishLaunch} /></>;
+  const allReady = fontsReady && ready && locationReady && bookingsReady && catalogReady;
+  // The app mounts underneath the launch screen as soon as data is ready, so the launch
+  // animation fades straight into the first screen.
+  return <View style={{ flex: 1, backgroundColor: launched ? colors.white : brandGreen }}>
+    <StatusBar style={launched ? 'dark' : 'light'} />
+    {allReady ? <AppScreens promptSeen={promptSeen} storageError={storageError} dismissStorageError={dismissStorageError} /> : null}
+    {!launched ? <LaunchScreen ready={allReady} onComplete={finishLaunch} /> : null}
+  </View>;
+}
+
+function AppScreens({ promptSeen, storageError, dismissStorageError }: { promptSeen: boolean; storageError: string | null; dismissStorageError: () => void }) {
   return <View style={{ flex: 1, backgroundColor: colors.white }}>
-    <StatusBar style="dark" />
     {storageError ? <Pressable accessibilityRole="button" accessibilityLabel="Dismiss storage warning" onPress={dismissStorageError} style={{ padding: 16, paddingTop: 48, backgroundColor: colors.softError }}><Text accessibilityRole="alert" style={{ fontFamily: fonts.medium, color: colors.error }}>{storageError} Tap to dismiss.</Text></Pressable> : null}
     <Stack screenOptions={{ headerStyle: { backgroundColor: colors.white }, headerTintColor: colors.ink, headerTitleStyle: { fontFamily: fonts.semibold, fontSize: 16 }, headerShadowVisible: false, contentStyle: { backgroundColor: colors.white }, headerBackButtonDisplayMode: 'minimal' }}>
       <Stack.Protected guard={promptSeen}>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="stay/[id]" options={{ title: 'Stay details' }} />
+        <Stack.Screen name="stay/[id]" options={{ headerShown: false }} />
         <Stack.Screen name="search" options={{ title: 'Search stays', presentation: 'modal', headerLeft: () => <Pressable accessibilityRole="button" accessibilityLabel="Close search" onPress={() => router.canGoBack() ? router.back() : router.replace('/')} style={{ minWidth: 44, minHeight: 44, justifyContent: 'center' }}><Icon name="close" size={22} /></Pressable> }} />
         <Stack.Screen name="plan" options={{ headerShown: false }} />
         <Stack.Screen name="review" options={{ title: 'Confirm your stay' }} />

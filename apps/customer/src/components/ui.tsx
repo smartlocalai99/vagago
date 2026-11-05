@@ -1,18 +1,20 @@
 import type { PropsWithChildren } from 'react';
 import { Pressable, ScrollView, Text, View, type TextStyle, type ViewStyle } from 'react-native';
+import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { estimateStaySubtotal } from '@vagago/domain';
 import { Icon, type IconName } from '@/components/icon';
 import { StayGallery } from '@/components/stay-gallery';
-import { PriceDisplay } from '@/components/price-display';
+import { DealPrice } from '@/components/price-display';
+import { discountPercent } from '@/data/search';
 import { colors, fonts } from '@/theme';
 import { money } from '@/data/stays';
 import { useEscape } from '@/state/escape-context';
 import type { Stay } from '@/types';
 
-export function AppText({ children, style, selectable = false }: PropsWithChildren<{ style?: TextStyle; selectable?: boolean }>) {
-  return <Text selectable={selectable} style={[{ fontFamily: fonts.regular, color: colors.ink, fontSize: 14, lineHeight: 21 }, style]}>{children}</Text>;
+export function AppText({ children, style, selectable = false, numberOfLines }: PropsWithChildren<{ style?: TextStyle; selectable?: boolean; numberOfLines?: number }>) {
+  return <Text selectable={selectable} numberOfLines={numberOfLines} style={[{ fontFamily: fonts.regular, color: colors.ink, fontSize: 14, lineHeight: 21 }, style]}>{children}</Text>;
 }
 export function Heading({ children, size = 22, style }: PropsWithChildren<{ size?: number; style?: TextStyle }>) {
   return <Text accessibilityRole="header" style={[{ fontFamily: fonts.bold, fontSize: size, lineHeight: size * 1.35, color: colors.ink, letterSpacing: -0.45 }, style]}>{children}</Text>;
@@ -38,23 +40,66 @@ export function PreviewNotice({ compact = false }: { compact?: boolean }) {
 export function SectionHeader({ title, eyebrow, action, onAction }: { title: string; eyebrow?: string; action?: string; onAction?: () => void }) {
   return <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}><View style={{ gap: 3, flex: 1 }}>{eyebrow ? <Eyebrow>{eyebrow}</Eyebrow> : null}<Heading size={20}>{title}</Heading></View>{action && onAction ? <Pressable accessibilityRole="button" onPress={onAction} style={{ flexDirection: 'row', alignItems: 'center', gap: 5, minHeight: 44 }}><AppText style={{ fontFamily: fonts.semibold, fontSize: 12, color: colors.pine }}>{action}</AppText><Icon name="chevron" size={14} /></Pressable> : null}</View>;
 }
+const styleLabels: Record<Stay['stayStyle'], string> = { villa: 'Villa', cottage: 'Cottage', homestay: 'Homestay', resort: 'Resort', hotel: 'Hotel' };
+export const stayStyleLabel = (stay: Stay) => styleLabels[stay.stayStyle];
+
+export function Chip({ label, icon, tone = 'neutral' }: { label: string; icon?: IconName; tone?: 'neutral' | 'save' }) {
+  const save = tone === 'save';
+  return <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 8, paddingVertical: 4, borderRadius: 6, backgroundColor: save ? colors.softSave : colors.canvas }}>
+    {icon ? <Icon name={icon} size={14} color={save ? colors.save : colors.ink} /> : null}
+    <Text style={{ fontFamily: fonts.medium, fontSize: 12, lineHeight: 17, color: save ? colors.save : colors.ink }}>{label}</Text>
+  </View>;
+}
+
 export function StayCard({ stay, style }: { stay: Stay; style?: ViewStyle }) {
   const { draft } = useEscape();
   const estimate = estimateStaySubtotal(stay.nightlyRate, draft.checkIn, draft.checkOut);
   const openStay = () => router.push(`/stay/${stay.id}`);
-  return <View style={style}>
-    <StayGallery stay={stay} compact onOpen={openStay} />
-    <Pressable accessibilityRole="button" accessibilityLabel={`View ${stay.name} details`} onPress={openStay} style={({ pressed }) => ({ paddingHorizontal: 18, paddingTop: 2, paddingBottom: 20, gap: 2, opacity: pressed ? 0.75 : 1 })}>
-      <View style={{ flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between', gap: 12 }}>
-        <Heading size={17} style={{ flexShrink: 1 }}>{stay.name}</Heading>
-        <PriceDisplay rate={stay.nightlyRate} compareAtRate={stay.compareAtRate} size={17} showDiscount={false} />
+  return <View style={[{ marginHorizontal: 12, marginBottom: 16, borderRadius: 16, borderCurve: 'continuous', backgroundColor: colors.white, boxShadow: '0 2px 12px rgba(0,0,0,0.09)' }, style]}>
+    <View style={{ borderTopLeftRadius: 16, borderTopRightRadius: 16, overflow: 'hidden' }}>
+      <StayGallery stay={stay} compact onOpen={openStay} />
+      <View pointerEvents="none" style={{ position: 'absolute', top: 12, left: 12, flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: colors.white, borderRadius: 6, paddingHorizontal: 8, paddingVertical: 4 }}>
+        <Icon name="home" size={13} color={colors.ink} />
+        <Text style={{ fontFamily: fonts.semibold, fontSize: 12, lineHeight: 16, color: colors.ink }}>{stayStyleLabel(stay)}</Text>
       </View>
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 12 }}>
-        <AppText style={{ color: colors.fern, fontSize: 12, flexShrink: 1 }}>{stay.area} · {stay.capacity} guests</AppText>
-        {estimate ? <AppText style={{ fontSize: 12, color: colors.fern }}>{money(estimate.subtotal)} total</AppText> : null}
+    </View>
+    <Pressable accessibilityRole="button" accessibilityLabel={`View ${stay.name} details`} onPress={openStay} style={({ pressed }) => ({ paddingHorizontal: 14, paddingTop: 12, paddingBottom: 14, gap: 4, opacity: pressed ? 0.75 : 1 })}>
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 4 }}>
+        <Chip icon="cash" label="Pay at stay" tone="save" />
+        <Chip icon="users" label={`Up to ${stay.capacity} guests`} />
       </View>
+      <AppText numberOfLines={2} style={{ fontFamily: fonts.semibold, fontSize: 17, lineHeight: 23 }}>{stay.name}</AppText>
+      <AppText numberOfLines={1} style={{ color: colors.fern, fontSize: 13, lineHeight: 18 }}>{stay.area}, Vagamon</AppText>
+      <View style={{ marginTop: 6 }}><DealPrice rate={stay.nightlyRate} compareAtRate={stay.compareAtRate} /></View>
+      <AppText style={{ color: colors.fern, fontSize: 12, lineHeight: 17 }}>+ taxes & fees{estimate ? ` · ${money(estimate.subtotal)} for ${estimate.nights} ${estimate.nights === 1 ? 'night' : 'nights'}` : ''}</AppText>
     </Pressable>
   </View>;
+}
+
+// Smaller card for the horizontal savings strip on Explore.
+export function ValueCard({ stay }: { stay: Stay }) {
+  const discount = discountPercent(stay.nightlyRate, stay.compareAtRate);
+  return <Pressable accessibilityRole="button" accessibilityLabel={`${stay.name}, ${money(stay.nightlyRate)} per night${discount ? `, ${discount}% off` : ''}`}
+    onPress={() => router.push(`/stay/${stay.id}`)}
+    style={({ pressed }) => ({ width: 248, borderRadius: 16, borderCurve: 'continuous', borderWidth: 1, borderColor: colors.stone, backgroundColor: colors.white, overflow: 'hidden', opacity: pressed ? 0.85 : 1 })}>
+    <View>
+      <Image source={stay.image} contentFit="cover" cachePolicy="memory-disk" transition={150} accessible={false} style={{ width: '100%', height: 132, backgroundColor: colors.stone }} />
+      {discount ? <View style={{ position: 'absolute', top: 10, left: 10, backgroundColor: colors.save, borderRadius: 6, paddingHorizontal: 8, paddingVertical: 4 }}>
+        <Text style={{ fontFamily: fonts.bold, fontSize: 12, lineHeight: 16, color: colors.white }}>{discount}% off</Text>
+      </View> : null}
+    </View>
+    <View style={{ padding: 12, gap: 3 }}>
+      <AppText numberOfLines={1} style={{ fontFamily: fonts.semibold, fontSize: 15, lineHeight: 21 }}>{stay.name}</AppText>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+        <Icon name="pin" size={13} color={colors.fern} />
+        <AppText numberOfLines={1} style={{ color: colors.fern, fontSize: 12, lineHeight: 17, flexShrink: 1 }}>{stay.area}</AppText>
+      </View>
+      <View style={{ alignItems: 'flex-end', marginTop: 8 }}>
+        <Text style={{ fontFamily: fonts.bold, fontSize: 20, lineHeight: 26, color: colors.pine, fontVariant: ['tabular-nums'] }}>{money(stay.nightlyRate)}</Text>
+        <AppText style={{ color: colors.fern, fontSize: 11, lineHeight: 15 }}>per night before taxes</AppText>
+      </View>
+    </View>
+  </Pressable>;
 }
 export function EmptyState({ title, body, action, onAction, icon = 'search' }: { title: string; body: string; action: string; onAction: () => void; icon?: IconName }) {
   return <View style={{ paddingVertical: 30, paddingHorizontal: 10, gap: 16, alignItems: 'center' }}><View style={{ width: 74, height: 74, backgroundColor: colors.meadow, alignItems: 'center', justifyContent: 'center', borderRadius: 25 }}><Icon name={icon} size={30} /></View><Heading size={21} style={{ textAlign: 'center' }}>{title}</Heading><AppText style={{ color: colors.fern, textAlign: 'center', fontSize: 13, lineHeight: 22 }}>{body}</AppText><Button label={action} onPress={onAction} /></View>;

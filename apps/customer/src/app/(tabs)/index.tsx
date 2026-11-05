@@ -1,89 +1,90 @@
-import { useState } from 'react';
-import { Keyboard, Pressable, RefreshControl, ScrollView, TextInput, View } from 'react-native';
+import { useState, type ReactNode } from 'react';
+import { Keyboard, Pressable, RefreshControl, ScrollView, Text, TextInput, View } from 'react-native';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { matchPreviewStays, validateGetawayDraft } from '@vagago/domain';
-import { AppText, EmptyState, StayCard } from '@/components/ui';
+import { validateGetawayDraft } from '@vagago/domain';
+import { AppText, EmptyState, Heading, StayCard, ValueCard } from '@/components/ui';
 import { Icon, type IconName } from '@/components/icon';
+import { SortSheet } from '@/components/sort-sheet';
+import { discountPercent, matchStays, sortOptions, sortStays, type SortId } from '@/data/search';
 import { useCatalog } from '@/state/catalog-context';
 import { useEscape } from '@/state/escape-context';
 import { colors, fonts } from '@/theme';
-import type { StayStyle } from '@/types';
 
-const categories: { id: StayStyle; label: string; icon: IconName }[] = [
-  { id: 'all', label: 'All stays', icon: 'bed' },
-  { id: 'homestay', label: 'Homestays', icon: 'home' },
-  { id: 'cottage', label: 'Cottages', icon: 'leaf' },
-  { id: 'villa', label: 'Villas', icon: 'sun' },
-];
-const sortOptions = [
-  { id: 'recommended', label: 'Default order' },
-  { id: 'low', label: 'Price: low to high' },
-  { id: 'high', label: 'Price: high to low' },
-] as const;
 function shortDate(value: string) {
   const date = new Date(`${value}T12:00:00Z`);
   return Number.isNaN(date.getTime()) ? 'Add dates' : new Intl.DateTimeFormat('en-IN', { day: 'numeric', month: 'short', timeZone: 'UTC' }).format(date);
+}
+
+function HeaderChip({ icon, label, accessibilityLabel, onPress, active = false, trailing }: { icon: IconName; label: string; accessibilityLabel: string; onPress: () => void; active?: boolean; trailing?: ReactNode }) {
+  return <Pressable accessibilityRole="button" accessibilityLabel={accessibilityLabel} onPress={onPress}
+    style={({ pressed }) => ({ minHeight: 40, flexDirection: 'row', alignItems: 'center', gap: 7, paddingHorizontal: 14, borderRadius: 20, borderWidth: 1, borderColor: active ? colors.ink : colors.stone, backgroundColor: active ? colors.canvas : colors.white, opacity: pressed ? 0.6 : 1 })}>
+    <Icon name={icon} size={16} color={colors.ink} />
+    <Text style={{ fontFamily: fonts.medium, fontSize: 14, color: colors.ink }}>{label}</Text>
+    {trailing}
+  </Pressable>;
 }
 
 export default function Explore() {
   const { draft, updateDraft } = useEscape();
   const { stays, refreshing, refresh, error } = useCatalog();
   const insets = useSafeAreaInsets();
-  const [sort, setSort] = useState<(typeof sortOptions)[number]['id']>('recommended');
+  const [sort, setSort] = useState<SortId>('recommended');
   const [sorting, setSorting] = useState(false);
-  const matches = matchPreviewStays(stays, draft);
-  const results = sort === 'recommended' ? matches : [...matches].sort((a, b) => sort === 'low' ? a.nightlyRate - b.nightlyRate : b.nightlyRate - a.nightlyRate);
+  const results = sortStays(matchStays(stays, draft), sort);
+  const deals = draft.query ? [] : results.filter((stay) => discountPercent(stay.nightlyRate, stay.compareAtRate) > 0)
+    .sort((a, b) => discountPercent(b.nightlyRate, b.compareAtRate) - discountPercent(a.nightlyRate, a.compareAtRate) || a.nightlyRate - b.nightlyRate);
   const valid = validateGetawayDraft(draft).valid;
   const editSearch = () => router.push('/search');
-
+  const dates = `${shortDate(draft.checkIn)} – ${shortDate(draft.checkOut)}`;
   const guestsLabel = `${draft.guests} ${draft.guests === 1 ? 'guest' : 'guests'}`;
+  const sortLabel = sortOptions.find((option) => option.id === sort)!.label;
 
   return <View style={{ flex: 1, backgroundColor: colors.white }}>
-    <View style={{ paddingTop: insets.top + 10, backgroundColor: colors.white, borderBottomWidth: 1, borderColor: colors.stone }}>
-      <View style={{ marginHorizontal: 16, flexDirection: 'row', alignItems: 'center', gap: 10, minHeight: 52, paddingHorizontal: 16, borderRadius: 26, backgroundColor: colors.canvas, borderWidth: 1, borderColor: colors.stone }}>
+    <View style={{ paddingTop: insets.top + 8, paddingBottom: 12, backgroundColor: colors.white, borderBottomWidth: 1, borderColor: colors.stone, gap: 12 }}>
+      <View style={{ marginHorizontal: 16, flexDirection: 'row', alignItems: 'center', gap: 10, minHeight: 50, paddingHorizontal: 14, borderRadius: 12, borderCurve: 'continuous', backgroundColor: colors.canvas, borderWidth: 1, borderColor: colors.stone }}>
         <Icon name="search" size={20} color={colors.ink} />
-        <TextInput accessibilityLabel="Search stays or places in Vagamon" placeholder="Search stays, pine forest, meadows…" placeholderTextColor={colors.fern}
+        <TextInput accessibilityLabel="Search stays or places in Vagamon" placeholder="Search stays or places in Vagamon" placeholderTextColor={colors.fern}
           value={draft.query} onChangeText={(query) => updateDraft({ query })} maxLength={120} returnKeyType="search"
           autoCapitalize="none" autoCorrect={false} clearButtonMode="never" onSubmitEditing={Keyboard.dismiss}
-          style={{ flex: 1, minHeight: 50, fontFamily: fonts.medium, fontSize: 15, color: colors.ink }} />
+          style={{ flex: 1, minHeight: 48, fontFamily: fonts.medium, fontSize: 15, color: colors.ink }} />
         {draft.query ? <Pressable accessibilityRole="button" accessibilityLabel="Clear search" hitSlop={10} onPress={() => updateDraft({ query: '' })}
           style={{ width: 24, height: 24, borderRadius: 12, backgroundColor: colors.stone, alignItems: 'center', justifyContent: 'center' }}><Icon name="close" size={13} color={colors.ink} /></Pressable> : null}
       </View>
-      <View style={{ flexDirection: 'row', gap: 8, marginHorizontal: 16, marginTop: 10 }}>
-        <Pressable accessibilityRole="button" accessibilityLabel={`Dates ${shortDate(draft.checkIn)} to ${shortDate(draft.checkOut)}, edit`} onPress={editSearch}
-          style={({ pressed }) => ({ flex: 1.4, minHeight: 40, flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 13, borderRadius: 20, borderWidth: 1, borderColor: colors.stone, opacity: pressed ? 0.6 : 1 })}>
-          <Icon name="calendar" size={16} color={colors.ink} /><AppText style={{ fontSize: 12, fontFamily: fonts.semibold }}>{shortDate(draft.checkIn)} – {shortDate(draft.checkOut)}</AppText>
-        </Pressable>
-        <Pressable accessibilityRole="button" accessibilityLabel={`${guestsLabel}, edit`} onPress={editSearch}
-          style={({ pressed }) => ({ flex: 1, minHeight: 40, flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 13, borderRadius: 20, borderWidth: 1, borderColor: colors.stone, opacity: pressed ? 0.6 : 1 })}>
-          <Icon name="users" size={16} color={colors.ink} /><AppText style={{ fontSize: 12, fontFamily: fonts.semibold }}>{guestsLabel}</AppText>
-        </Pressable>
-        <Pressable accessibilityRole="button" accessibilityLabel="More filters" onPress={editSearch}
-          style={({ pressed }) => ({ width: 40, height: 40, borderRadius: 20, borderWidth: 1, borderColor: colors.stone, alignItems: 'center', justifyContent: 'center', opacity: pressed ? 0.6 : 1 })}>
-          <Icon name="sliders" size={17} color={colors.ink} />
-        </Pressable>
-      </View>
-      <View style={{ flexDirection: 'row', marginTop: 14, paddingHorizontal: 16, gap: 12 }}>
-        {categories.map((category) => {
-          const selected = category.id === draft.stayStyle;
-          return <Pressable key={category.id} accessibilityRole="button" accessibilityLabel={category.label} accessibilityState={{ selected }} aria-selected={selected} onPress={() => updateDraft({ stayStyle: category.id, mood: null, stayId: null, roomOptionId: null })} style={{ flex: 1, alignItems: 'center', paddingBottom: 10, gap: 6, borderBottomWidth: 2, borderBottomColor: selected ? colors.ink : 'transparent' }}>
-            <Icon name={category.icon} size={22} color={selected ? colors.ink : colors.fern} />
-            <AppText style={{ fontSize: 11, lineHeight: 17, fontFamily: selected ? fonts.bold : fonts.medium, color: selected ? colors.ink : colors.fern }}>{category.label}</AppText>
-          </Pressable>;
-        })}
-      </View>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} keyboardShouldPersistTaps="handled" contentContainerStyle={{ paddingHorizontal: 16, gap: 8 }}>
+        <HeaderChip icon="sort" label={sort === 'recommended' ? 'Sort' : sortLabel} accessibilityLabel={`Sort stays, currently ${sortLabel}`} active={sort !== 'recommended'} onPress={() => { Keyboard.dismiss(); setSorting(true); }} />
+        <HeaderChip icon="calendar" label={dates} accessibilityLabel={`Dates ${dates}, edit`} onPress={editSearch} />
+        <HeaderChip icon="users" label={guestsLabel} accessibilityLabel={`${guestsLabel}, edit`} onPress={editSearch} />
+      </ScrollView>
     </View>
+
     <ScrollView contentInsetAdjustmentBehavior="never" keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag" contentContainerStyle={{ paddingBottom: 96 + insets.bottom }}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => void refresh()} tintColor={colors.fern} />}>
-      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12, paddingHorizontal: 18, paddingVertical: 4 }}>
-        <AppText style={{ color: colors.fern, fontSize: 12 }}>{results.length} {results.length === 1 ? 'stay' : 'stays'} in Vagamon</AppText>
-        <Pressable accessibilityRole="button" accessibilityLabel="Sort stays" accessibilityState={{ expanded: sorting }} onPress={() => setSorting(!sorting)} style={{ minHeight: 40, flexDirection: 'row', alignItems: 'center', gap: 5 }}><Icon name="sort" size={14} color={colors.ink} /><AppText style={{ fontSize: 12, fontFamily: fonts.semibold }}>Sort</AppText></Pressable>
+      <View style={{ paddingHorizontal: 16, paddingTop: 18, paddingBottom: 14, gap: 4 }}>
+        <Heading size={23}>Affordable stays at the best price</Heading>
+        <Pressable accessibilityRole="button" accessibilityLabel={`Vagamon, ${dates}, ${guestsLabel}. Edit search`} onPress={editSearch}
+          style={({ pressed }) => ({ flexDirection: 'row', alignItems: 'center', gap: 8, alignSelf: 'flex-start', minHeight: 32, opacity: pressed ? 0.6 : 1 })}>
+          <AppText style={{ color: colors.fern, fontSize: 14 }}>Vagamon · {dates} · {guestsLabel}</AppText>
+          <Icon name="edit" size={17} color={colors.pine} />
+        </Pressable>
       </View>
-      {sorting ? <View style={{ backgroundColor: colors.canvas, borderRadius: 14, padding: 6, marginHorizontal: 16, marginBottom: 10 }}>{sortOptions.map((option) => <Pressable key={option.id} accessibilityRole="button" accessibilityState={{ selected: sort === option.id }} onPress={() => { setSort(option.id); setSorting(false); }} style={{ minHeight: 46, paddingHorizontal: 12, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}><AppText style={{ fontSize: 13 }}>{option.label}</AppText>{sort === option.id ? <Icon name="check" size={17} /> : null}</Pressable>)}</View> : null}
-      {error ? <AppText style={{ fontSize: 12, color: colors.error, marginHorizontal: 18, marginBottom: 10 }}>{error}</AppText> : null}
-      {!valid ? <Pressable accessibilityRole="button" accessibilityLabel="Update travel dates" onPress={editSearch} style={{ backgroundColor: colors.softError, padding: 12, borderRadius: 10, marginHorizontal: 16, marginBottom: 10 }}><AppText style={{ fontSize: 12, color: colors.error }}>Update your dates to continue booking.</AppText></Pressable> : null}
-      {results.length ? results.map((stay) => <StayCard key={stay.id} stay={stay} />) : <View style={{ paddingHorizontal: 20 }}><EmptyState title="No stays found" body="Try another name or place, or change the property type." action="Clear search" onAction={() => updateDraft({ query: '', stayStyle: 'all' })} /></View>}
+
+      {deals.length >= 2 ? <View style={{ gap: 12, paddingBottom: 22 }}>
+        <Heading size={18} style={{ paddingHorizontal: 16 }}>Biggest savings</Heading>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 16, gap: 12 }}>
+          {deals.map((stay) => <ValueCard key={stay.id} stay={stay} />)}
+        </ScrollView>
+      </View> : null}
+
+      <View style={{ flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between', gap: 12, paddingHorizontal: 16, paddingBottom: 12 }}>
+        <Heading size={18}>{results.length} {results.length === 1 ? 'stay' : 'stays'} in Vagamon</Heading>
+        {sort !== 'recommended' ? <AppText style={{ color: colors.fern, fontSize: 12 }}>{sortLabel}</AppText> : null}
+      </View>
+      {error ? <AppText style={{ fontSize: 12, color: colors.error, marginHorizontal: 16, marginBottom: 10 }}>{error}</AppText> : null}
+      {!valid ? <Pressable accessibilityRole="button" accessibilityLabel="Update travel dates" onPress={editSearch} style={{ backgroundColor: colors.softError, padding: 12, borderRadius: 10, marginHorizontal: 16, marginBottom: 12 }}><AppText style={{ fontSize: 12, color: colors.error }}>Update your dates to continue booking.</AppText></Pressable> : null}
+      {results.length ? results.map((stay) => <StayCard key={stay.id} stay={stay} />) : <View style={{ paddingHorizontal: 20 }}><EmptyState title="No stays found" body="Try another stay name or place in Vagamon." action="Clear search" onAction={() => updateDraft({ query: '' })} /></View>}
     </ScrollView>
+
+    <SortSheet visible={sorting} value={sort} onChange={setSort} onClose={() => setSorting(false)} />
   </View>;
 }

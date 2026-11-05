@@ -3,6 +3,8 @@ export const colors = {
   meadow: '#FFF0F3', stone: '#EBEBEB', pollen: '#F6BB45', white: '#FFFFFF',
   error: '#9B382C', softError: '#F8EAE6',
   canvas: '#F7F7F7', deal: '#C03A21', softDeal: '#FFF2E8',
+  // Savings and pay-at-stay cues, and the brand green used on the splash.
+  save: '#1B7F4C', softSave: '#E9F6EF', brand: '#073728',
 };
 export const fonts = {
   regular: 'Manrope_400Regular', medium: 'Manrope_500Medium',

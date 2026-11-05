@@ -1,7 +1,7 @@
 import Svg, { Circle, Path, Polyline } from 'react-native-svg';
 import { colors } from '@/theme';
 
-export type IconName = 'arrow' | 'back' | 'heart' | 'leaf' | 'sun' | 'moon' | 'mountain' | 'compass' | 'calendar' | 'users' | 'search' | 'close' | 'check' | 'pin' | 'plus' | 'minus' | 'sliders' | 'home' | 'coffee' | 'chevron' | 'user' | 'suitcase' | 'sort' | 'bed' | 'info' | 'lock' | 'tag' | 'flame' | 'play' | 'pause' | 'shield' | 'credit-card' | 'mail' | 'phone' | 'ticket' | 'navigation' | 'car';
+export type IconName = 'arrow' | 'back' | 'heart' | 'leaf' | 'sun' | 'moon' | 'mountain' | 'compass' | 'calendar' | 'users' | 'search' | 'close' | 'check' | 'pin' | 'plus' | 'minus' | 'sliders' | 'home' | 'coffee' | 'chevron' | 'user' | 'suitcase' | 'sort' | 'bed' | 'info' | 'lock' | 'tag' | 'flame' | 'play' | 'pause' | 'shield' | 'credit-card' | 'mail' | 'phone' | 'ticket' | 'navigation' | 'car' | 'share' | 'image' | 'cash' | 'edit';
 export function Icon({ name, size = 22, color = colors.pine, filled = false }: { name: IconName; size?: number; color?: string; filled?: boolean }) {
   return <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
     {name === 'arrow' && <><Path d="M4 12h15M13 5l7 7-7 7" /></>}
@@ -40,6 +40,10 @@ export function Icon({ name, size = 22, color = colors.pine, filled = false }: {
     {name === 'phone' && <Path d="m6 3 4 4-3 3c1 3 4 6 7 7l3-3 4 4-2 3C10 22 2 14 3 5l3-2Z" />}
     {name === 'navigation' && <Path d="m3 11 18-8-8 18-2-8-8-2Z" fill={filled ? color : 'none'} />}
     {name === 'car' && <><Path d="M5 17h14v-5l-2-5H7l-2 5v5ZM3 12h18M5 17v3m14-3v3" /><Circle cx="8" cy="14.5" r="0.8" /><Circle cx="16" cy="14.5" r="0.8" /></>}
+    {name === 'share' && <Path d="M12 3v13M7 8l5-5 5 5M5 13v8h14v-8" />}
+    {name === 'image' && <><Path d="M3 4h18v16H3z" /><Circle cx="8.5" cy="9" r="1.8" /><Path d="m21 16-5-5-9 9" /></>}
+    {name === 'cash' && <><Path d="M2 6h20v12H2z" /><Circle cx="12" cy="12" r="2.6" /><Path d="M6 9v.01M18 15v.01" /></>}
+    {name === 'edit' && <><Path d="M11 4H4v16h16v-7" /><Path d="M18.4 2.6a2 2 0 0 1 3 3L12 15l-4 1 1-4 9.4-9.4Z" /></>}
     {name === 'ticket' && <><Path d="M3 6h18v4a2 2 0 0 0 0 4v4H3v-4a2 2 0 0 0 0-4V6Z" /><Path d="M15 7v2m0 2v2m0 2v2" /></>}
   </Svg>;
 }

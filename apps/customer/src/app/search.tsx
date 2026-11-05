@@ -3,24 +3,16 @@ import { AccessibilityInfo, Keyboard, KeyboardAvoidingView, Pressable, ScrollVie
 import { router, useLocalSearchParams } from 'expo-router';
 import { Stack } from 'expo-router/stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { matchPreviewStays, validateGetawayDraft } from '@vagago/domain';
+import { validateGetawayDraft } from '@vagago/domain';
 import { DateRange } from '@/components/date-range';
 import { Icon } from '@/components/icon';
 import { AppText, Button, Heading } from '@/components/ui';
-import { money } from '@/data/stays';
+import { matchStays } from '@/data/search';
 import { useStays } from '@/state/catalog-context';
 import { useEscape } from '@/state/escape-context';
 import { createDefaultDraft } from '@/state/storage-records';
 import { colors, fonts } from '@/theme';
-import type { EscapeDraft, StayStyle } from '@/types';
-
-const propertyTypes: { value: StayStyle; label: string }[] = [
-  { value: 'all', label: 'Any type' },
-  { value: 'cottage', label: 'Cottages' },
-  { value: 'homestay', label: 'Homestays' },
-  { value: 'villa', label: 'Villas' },
-];
-const budgetOptions = [7500, 10000, 15000, 50000];
+import type { EscapeDraft } from '@/types';
 
 export default function SearchScreen() {
   const { returnTo } = useLocalSearchParams<{ returnTo?: string }>();
@@ -31,7 +23,7 @@ export default function SearchScreen() {
   const scroll = useRef<ScrollView>(null);
   const [pending, setPending] = useState<EscapeDraft>(() => ({ ...draft, mood: null }));
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const matches = matchPreviewStays(stays, pending);
+  const matches = matchStays(stays, pending);
 
   function change(patch: Partial<EscapeDraft>) {
     setPending((current) => ({ ...current, ...patch }));
@@ -44,7 +36,7 @@ export default function SearchScreen() {
     setPending(validateGetawayDraft(withCurrentDates).valid ? withCurrentDates : defaults);
     setErrors({});
     Keyboard.dismiss();
-    AccessibilityInfo.announceForAccessibility('Search filters reset.');
+    AccessibilityInfo.announceForAccessibility('Search reset.');
   }
 
   function showStays() {
@@ -129,42 +121,6 @@ export default function SearchScreen() {
         </View>
       </View>
 
-      {!editingBooking ? <><View style={{ gap: 12 }}>
-        <Heading size={18}>Property type</Heading>
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-          {propertyTypes.map(({ value, label }) => {
-            const selected = pending.stayStyle === value;
-            return <Pressable key={value} accessibilityRole="button" accessibilityLabel={label}
-              accessibilityState={{ selected }} onPress={() => change({ stayStyle: value })}
-              style={({ pressed }) => ({ minHeight: 44, justifyContent: 'center', paddingHorizontal: 15,
-                borderWidth: 1, borderColor: selected ? colors.pine : colors.stone, borderRadius: 12,
-                backgroundColor: selected ? colors.pine : colors.white, opacity: pressed ? 0.75 : 1 })}>
-              <AppText style={{ fontSize: 12, fontFamily: selected ? fonts.bold : fonts.medium,
-                color: selected ? colors.white : colors.ink }}>{label}</AppText>
-            </Pressable>;
-          })}
-        </View>
-      </View>
-
-      <View style={{ gap: 12 }}>
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 6 }}>
-          <Heading size={18}>Nightly budget</Heading>
-          <AppText selectable style={{ fontSize: 13, fontFamily: fonts.semibold }}>Up to {money(pending.nightlyBudget)}</AppText>
-        </View>
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-          {budgetOptions.map((amount) => {
-            const selected = pending.nightlyBudget === amount;
-            return <Pressable key={amount} accessibilityRole="button" accessibilityLabel={`Budget up to ${money(amount)} per night`}
-              accessibilityState={{ selected }} onPress={() => change({ nightlyBudget: amount })}
-              style={({ pressed }) => ({ minHeight: 44, justifyContent: 'center', paddingHorizontal: 13,
-                borderWidth: 1, borderColor: selected ? colors.pine : colors.stone, borderRadius: 12,
-                backgroundColor: selected ? colors.meadow : colors.white, opacity: pressed ? 0.75 : 1 })}>
-              <AppText style={{ fontSize: 12, fontFamily: selected ? fonts.bold : fonts.medium }}>{money(amount)}</AppText>
-            </Pressable>;
-          })}
-        </View>
-        <AppText style={{ color: colors.fern, fontSize: 11, lineHeight: 18 }}>Nightly rates, before taxes and fees.</AppText>
-      </View></> : null}
 
       {Object.entries(errors).filter(([key]) => key !== 'checkIn' && key !== 'checkOut').map(([key, message]) =>
         <Text key={key} selectable accessibilityRole="alert" accessibilityLiveRegion="polite"
@@ -174,7 +130,7 @@ export default function SearchScreen() {
     <View style={{ paddingHorizontal: 20, paddingTop: 14, paddingBottom: Math.max(insets.bottom, 16),
       backgroundColor: colors.white, borderTopWidth: 1, borderColor: colors.stone, gap: 10 }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 18 }}>
-        <Pressable accessibilityRole="button" accessibilityLabel="Reset search filters" onPress={reset}
+        <Pressable accessibilityRole="button" accessibilityLabel="Reset search" onPress={reset}
           style={({ pressed }) => ({ minHeight: 50, justifyContent: 'center', paddingRight: 6, opacity: pressed ? 0.6 : 1 })}>
           <AppText style={{ fontFamily: fonts.semibold, fontSize: 13, textDecorationLine: 'underline' }}>Reset</AppText>
         </Pressable>

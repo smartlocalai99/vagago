@@ -1,21 +1,27 @@
 import { useState } from 'react';
-import { Pressable, ScrollView, View } from 'react-native';
+import { Pressable, ScrollView, Share, Text, useWindowDimensions, View } from 'react-native';
+import { Image } from 'expo-image';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Stack } from 'expo-router/stack';
+import { StatusBar } from 'expo-status-bar';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { matchPreviewStays, parseDateOnly, validateGetawayDraft } from '@vagago/domain';
-import { AppText, Button, EmptyState, Heading, Page } from '@/components/ui';
+import { parseDateOnly, validateGetawayDraft } from '@vagago/domain';
+import { AppText, Button, Chip, EmptyState, Heading, Page, stayStyleLabel } from '@/components/ui';
 import { Icon } from '@/components/icon';
 import { StayGallery } from '@/components/stay-gallery';
 import { HiddenLocation } from '@/components/hidden-location';
 import { NearbyPlaces } from '@/components/nearby-places';
-import { PriceDisplay } from '@/components/price-display';
+import { openArea } from '@/components/directions';
+import { DealPrice, PriceDisplay } from '@/components/price-display';
+import { matchStays } from '@/data/search';
 import { money } from '@/data/stays';
 import { useCatalog } from '@/state/catalog-context';
 import { getRoomOptions, type RoomOption } from '@/data/room-options';
 import { useEscape } from '@/state/escape-context';
 import { colors, fonts } from '@/theme';
 import type { Stay } from '@/types';
+
+const brandMark = require('../../../assets/splash-mark.png');
 
 function displayDate(value: string) {
   const date = parseDateOnly(value);
@@ -53,19 +59,32 @@ function AccommodationOption({ option, selected, guests, onSelect }: {
   </Pressable>;
 }
 
+function RoundButton({ icon, label, onPress }: { icon: 'back' | 'share'; label: string; onPress: () => void }) {
+  return <Pressable accessibilityRole="button" accessibilityLabel={label} onPress={onPress} hitSlop={4}
+    style={({ pressed }) => ({ width: 40, height: 40, borderRadius: 20, backgroundColor: colors.white, alignItems: 'center', justifyContent: 'center', boxShadow: '0 1px 6px rgba(0,0,0,0.18)', opacity: pressed ? 0.75 : 1 })}>
+    <Icon name={icon} size={19} color={colors.ink} />
+  </Pressable>;
+}
+
 function StayDetailContent({ stay }: { stay: Stay }) {
   const { draft, updateDraft } = useEscape();
   const insets = useSafeAreaInsets();
+  const { width } = useWindowDimensions();
+  // Once the photo has scrolled away, a solid bar with the name replaces the floating buttons' backdrop.
+  const [solidHeader, setSolidHeader] = useState(false);
+  const solidAfter = width * 0.92 - 56;
   const options = getRoomOptions(stay);
   const [selectedId, setSelectedId] = useState(() => options.find((option) => option.id === draft.roomOptionId)?.id ?? options[0].id);
   const selected = options.find((option) => option.id === selectedId) ?? options[0];
   const validation = validateGetawayDraft(draft);
   const suitable = draft.guests <= selected.capacity;
-  const matchesSearch = matchPreviewStays([stay], draft).length > 0;
+  const matchesSearch = matchStays([stay], draft).length > 0;
   const error = !validation.valid ? Object.values(validation.errors)[0]
     : !suitable ? `This ${stay.stayStyle} fits up to ${selected.capacity} guests. Edit your guest count.`
-    : !matchesSearch ? 'This stay does not match your current search. Edit dates and guests or adjust your filters.' : null;
+    : !matchesSearch ? 'This stay does not fit your group. Edit your guest count.' : null;
   const editSearch = () => router.push('/search');
+  const goBack = () => router.canGoBack() ? router.back() : router.replace('/');
+  const share = () => void Share.share({ message: `${stay.name}, ${stay.area}, Vagamon. From ${money(stay.nightlyRate)} a night on VagaGo.` }).catch(() => undefined);
   const bookStay = () => {
     if (error) return;
     updateDraft({ stayId: stay.id, roomOptionId: selected.id, roomCount: 1 });
@@ -73,14 +92,32 @@ function StayDetailContent({ stay }: { stay: Stay }) {
   };
 
   return <View style={{ flex: 1, backgroundColor: colors.white }}>
-    <Stack.Screen options={{ title: 'Property details', headerLeft: () => <Pressable accessibilityRole="button" accessibilityLabel="Back to stays" onPress={() => router.canGoBack() ? router.back() : router.replace('/')} style={{ minWidth: 44, minHeight: 44, justifyContent: 'center' }}><Icon name="back" size={22} /></Pressable> }} />
-    <ScrollView style={{ flex: 1 }} contentInsetAdjustmentBehavior="automatic" contentContainerStyle={{ paddingBottom: 24 }}>
-      <StayGallery stay={stay} />
-      <View style={{ paddingHorizontal: 20, gap: 24, paddingTop: 20 }}>
-        <View style={{ gap: 8 }}>
-          <Heading size={25} style={{ fontFamily: fonts.bold, lineHeight: 32, color: colors.ink }}>{stay.name}</Heading>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}><Icon name="pin" size={15} /><AppText style={{ color: colors.fern, fontSize: 12 }}>{stay.area}, Vagamon, Kerala</AppText></View>
-          <AppText style={{ fontSize: 13, color: colors.fern }}>{stay.bedrooms} {stay.bedrooms === 1 ? 'bedroom' : 'bedrooms'} · Up to {stay.capacity} guests · Entire {stay.stayStyle}</AppText>
+    <StatusBar style={solidHeader ? 'dark' : 'light'} />
+    <ScrollView style={{ flex: 1 }} contentInsetAdjustmentBehavior="never" contentContainerStyle={{ paddingBottom: 28 }} scrollEventThrottle={16}
+      onScroll={(event) => { const solid = event.nativeEvent.contentOffset.y > solidAfter; if (solid !== solidHeader) setSolidHeader(solid); }}>
+      <StayGallery stay={stay} topInset={insets.top} />
+      <View style={{ paddingHorizontal: 18, paddingTop: 18, gap: 24 }}>
+        <View style={{ gap: 10 }}>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+            <Chip icon="home" label={`Entire ${stayStyleLabel(stay).toLowerCase()}`} />
+            <Chip icon="cash" label="Pay at stay" tone="save" />
+          </View>
+          <Heading size={27} style={{ lineHeight: 34, letterSpacing: -0.6 }}>{stay.name}</Heading>
+          {stay.tagline ? <AppText style={{ color: colors.fern, fontSize: 14 }}>{stay.tagline}</AppText> : null}
+          <View style={{ gap: 6, paddingTop: 14, borderTopWidth: 1, borderColor: colors.stone, marginTop: 4 }}>
+            <AppText style={{ fontSize: 15, lineHeight: 23 }}>{stay.area}, Vagamon, Kerala | {stay.bedrooms} {stay.bedrooms === 1 ? 'bedroom' : 'bedrooms'} | Up to {stay.capacity} guests</AppText>
+            <Pressable accessibilityRole="link" accessibilityLabel={`View ${stay.area} on the map`} onPress={() => openArea(stay.coordinates, `${stay.area}, Vagamon`)} style={{ alignSelf: 'flex-start', minHeight: 36, justifyContent: 'center' }}>
+              <AppText style={{ fontFamily: fonts.semibold, fontSize: 15, color: colors.pine }}>View area on map</AppText>
+            </Pressable>
+          </View>
+        </View>
+
+        <View style={{ backgroundColor: colors.brand, borderRadius: 16, borderCurve: 'continuous', padding: 18, flexDirection: 'row', alignItems: 'center', gap: 14 }}>
+          <View style={{ flex: 1, gap: 6 }}>
+            <Text style={{ fontFamily: fonts.bold, fontSize: 19, lineHeight: 25, color: colors.white }}>Book now, pay at the stay</Text>
+            <Text style={{ fontFamily: fonts.regular, fontSize: 13, lineHeight: 19, color: 'rgba(255,255,255,0.8)' }}>No advance payment. The exact address and directions unlock as soon as you book.</Text>
+          </View>
+          <Image source={brandMark} accessible={false} contentFit="contain" style={{ width: 62, height: 47 }} />
         </View>
 
         <Pressable accessibilityRole="button" accessibilityLabel="Edit dates and guests" onPress={editSearch}
@@ -93,14 +130,19 @@ function StayDetailContent({ stay }: { stay: Stay }) {
           <AppText style={{ fontFamily: fonts.semibold, fontSize: 12, textDecorationLine: 'underline' }}>Edit</AppText>
         </Pressable>
 
-        <View style={{ gap: 14 }}>
+        {stay.description ? <View style={{ gap: 8 }}>
+          <Heading size={19}>About this stay</Heading>
+          <AppText style={{ fontSize: 14, lineHeight: 22, color: colors.ink }}>{stay.description}</AppText>
+        </View> : null}
+
+        {stay.amenities.length ? <View style={{ gap: 14 }}>
           <Heading size={19}>What this place offers</Heading>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
             {stay.amenities.map((amenity) => <View key={amenity} style={{ width: '47%', flexDirection: 'row', alignItems: 'center', gap: 9 }}>
-              <Icon name="check" size={18} /><AppText style={{ fontSize: 13, flexShrink: 1 }}>{amenity}</AppText>
+              <Icon name="check" size={18} color={colors.save} /><AppText style={{ fontSize: 13, flexShrink: 1 }}>{amenity}</AppText>
             </View>)}
           </View>
-        </View>
+        </View> : null}
 
         <View style={{ borderTopWidth: 1, borderColor: colors.stone, paddingTop: 22, gap: 12 }}>
           <View style={{ gap: 4 }}><Heading size={19}>Choose your stay</Heading><AppText style={{ color: colors.fern, fontSize: 12 }}>The whole property is yours</AppText></View>
@@ -112,19 +154,27 @@ function StayDetailContent({ stay }: { stay: Stay }) {
         <NearbyPlaces stay={stay} />
       </View>
     </ScrollView>
-    <View style={{ borderTopWidth: 1, borderColor: colors.stone, backgroundColor: colors.white, paddingHorizontal: 20, paddingTop: 12, paddingBottom: Math.max(insets.bottom, 12), gap: 9 }}>
+
+    <View style={{ position: 'absolute', top: 0, left: 0, right: 0, paddingTop: insets.top + 8, paddingBottom: 8, paddingHorizontal: 14, flexDirection: 'row', alignItems: 'center', gap: 12,
+      backgroundColor: solidHeader ? colors.white : 'transparent', borderBottomWidth: 1, borderColor: solidHeader ? colors.stone : 'transparent' }}>
+      <RoundButton icon="back" label="Back to stays" onPress={goBack} />
+      <Text numberOfLines={1} accessibilityElementsHidden={!solidHeader} style={{ flex: 1, textAlign: 'center', fontFamily: fonts.semibold, fontSize: 16, color: colors.ink, opacity: solidHeader ? 1 : 0 }}>{stay.name}</Text>
+      <RoundButton icon="share" label={`Share ${stay.name}`} onPress={share} />
+    </View>
+
+    <View style={{ backgroundColor: colors.white, paddingHorizontal: 18, paddingTop: 12, paddingBottom: Math.max(insets.bottom, 12), gap: 8, boxShadow: '0 -2px 12px rgba(0,0,0,0.08)' }}>
       {error ? <View style={{ gap: 3 }}>
         <AppText selectable style={{ color: colors.error, fontSize: 12, lineHeight: 18 }}>{error}</AppText>
         <Pressable accessibilityRole="button" accessibilityLabel="Edit search" onPress={editSearch} style={{ minHeight: 44, justifyContent: 'center', alignSelf: 'flex-start' }}>
-          <AppText style={{ fontFamily: fonts.semibold, fontSize: 12, textDecorationLine: 'underline' }}>Edit search</AppText>
+          <AppText style={{ fontFamily: fonts.semibold, fontSize: 12, textDecorationLine: 'underline' }}>Edit dates and guests</AppText>
         </Pressable>
       </View> : null}
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
-        <View style={{ flex: 1, gap: 2 }}>
-          <PriceDisplay rate={selected.nightlyRate} compareAtRate={selected.compareAtRate} size={20} showDiscount={false} />
-          <AppText style={{ fontSize: 10, lineHeight: 17, color: colors.fern }}>Taxes & fees extra</AppText>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+        <View style={{ flex: 1, gap: 1 }}>
+          <DealPrice rate={selected.nightlyRate} compareAtRate={selected.compareAtRate} size={24} showDiscount={false} />
+          <AppText style={{ fontSize: 13, lineHeight: 18, color: colors.pine, fontFamily: fonts.medium }}>+ taxes & fees</AppText>
         </View>
-        <Button label="Book now" onPress={bookStay} disabled={Boolean(error)} icon={null} style={{ minHeight: 50, borderRadius: 11, paddingHorizontal: 21 }} />
+        <Button label="Book now & pay at stay" onPress={bookStay} disabled={Boolean(error)} icon={null} style={{ minHeight: 52, borderRadius: 12, paddingHorizontal: 18 }} />
       </View>
     </View>
   </View>;
@@ -134,7 +184,7 @@ export default function StayDetails() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { stays, ready } = useCatalog();
   const stay = stays.find((item) => item.id === id);
-  if (!stay && !ready) return <Page><Stack.Screen options={{ title: 'Property details' }} /></Page>;
-  if (!stay) return <Page><Stack.Screen options={{ title: 'Property details' }} /><EmptyState title="Stay not found" body="This property is no longer listed." action="Explore stays" onAction={() => router.replace('/')} icon="search" /></Page>;
+  if (!stay && !ready) return <Page><Stack.Screen options={{ headerShown: true, title: 'Property details' }} /></Page>;
+  if (!stay) return <Page><Stack.Screen options={{ headerShown: true, title: 'Property details' }} /><EmptyState title="Stay not found" body="This property is no longer listed." action="Explore stays" onAction={() => router.replace('/')} icon="search" /></Page>;
   return <StayDetailContent key={stay.id} stay={stay} />;
 }

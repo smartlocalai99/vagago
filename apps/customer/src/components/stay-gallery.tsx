@@ -1,13 +1,15 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { AccessibilityInfo, AppState, Pressable, ScrollView, Text, View, type NativeScrollEvent, type NativeSyntheticEvent } from 'react-native';
 import { Image } from 'expo-image';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useIsFocused } from 'expo-router';
+import { Icon } from '@/components/icon';
 import { colors, fonts } from '@/theme';
 import type { Stay } from '@/types';
 
-type GalleryProps = { stay: Stay; compact?: boolean; onOpen?: () => void };
+type GalleryProps = { stay: Stay; compact?: boolean; topInset?: number; onOpen?: () => void };
 
-function Gallery({ stay, compact = false, onOpen }: GalleryProps) {
+function Gallery({ stay, compact = false, topInset = 0, onOpen }: GalleryProps) {
   const photos = stay.gallery.length ? stay.gallery : [stay.image];
   const gallery = useRef<ScrollView>(null);
   const selectedRef = useRef(0);
@@ -85,41 +87,48 @@ function Gallery({ stay, compact = false, onOpen }: GalleryProps) {
   };
   const webInteractionProps = process.env.EXPO_OS === 'web' ? { onWheel: pause } : {};
 
-  // Compact galleries run edge to edge in the Explore feed, without thumbnails.
-  return <View style={{ gap: 10 }}>
-    <View onLayout={(event) => setWidth(event.nativeEvent.layout.width)}
-      style={{ aspectRatio: compact ? 1.15 : 1.3, overflow: 'hidden', backgroundColor: colors.stone }}>
-      {width > 0 ? <ScrollView {...webInteractionProps} ref={gallery} horizontal pagingEnabled showsHorizontalScrollIndicator={false}
-        onScroll={trackScroll} scrollEventThrottle={16} onMomentumScrollEnd={trackScroll}
-        onScrollBeginDrag={pause} onTouchStart={pause} onPointerDown={pause}
-        style={{ flex: 1 }}>
-        {photos.map((photo, index) => onOpen ? <Pressable key={index} onPress={onOpen} onPressIn={pause}
-          accessibilityRole="button" accessibilityLabel={`View ${stay.name}, photo ${index + 1} of ${photos.length}`}
-          style={{ width, height: '100%' }}>
-          <Image source={photo} contentFit="cover" cachePolicy="memory-disk" transition={150} recyclingKey={`${stay.id}-${index}`} style={{ width: '100%', height: '100%' }} accessible={false} />
-        </Pressable> : <Image key={index} source={photo} contentFit="cover" cachePolicy="memory-disk" transition={150} style={{ width, height: '100%' }}
-          accessibilityLabel={`${stay.name}, representative photo ${index + 1} of ${photos.length}`} />)}
-      </ScrollView> : null}
+  const thumbWidth = (width - 24 - 3 * 8) / 4;
+  const showThumbs = !compact && hasSlides;
 
-      {!compact ? <View pointerEvents="none" style={{ position: 'absolute', right: 12, bottom: 15, backgroundColor: 'rgba(0,0,0,0.55)', borderRadius: 7, paddingHorizontal: 9, paddingVertical: 5 }}>
-        <Text accessibilityLabel={`Photo ${selected + 1} of ${photos.length}`} style={{ fontFamily: fonts.semibold, color: colors.white, fontSize: 11, fontVariant: ['tabular-nums'] }}>{selected + 1}/{photos.length}</Text>
-      </View> : null}
-      {hasSlides ? <View style={{ position: 'absolute', bottom: 5, alignSelf: 'center', flexDirection: 'row' }}>
-        {photos.map((_, index) => <Pressable key={index} accessibilityRole="button" accessibilityLabel={`${stay.name}: photo ${index + 1}`}
-          accessibilityState={{ selected: selected === index }} onPress={() => selectPhoto(index)}
-          style={{ width: 44, height: 44, alignItems: 'center', justifyContent: 'center' }}>
-          <View style={{ width: selected === index ? 7 : 5, height: selected === index ? 7 : 5, borderRadius: 4, backgroundColor: selected === index ? colors.white : 'rgba(255,255,255,0.65)', boxShadow: '0 1px 4px rgba(0,0,0,0.2)' }} />
-        </Pressable>)}
-      </View> : null}
-    </View>
-
-    {!compact ? <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 20, gap: 8 }}>
-      {photos.map((photo, index) => <Pressable key={index} accessibilityRole="button" accessibilityLabel={`Show photo ${index + 1} of ${stay.name}`}
-        accessibilityState={{ selected: selected === index }} onPress={() => selectPhoto(index)}
-        style={({ pressed }) => ({ width: 74, height: 58, padding: 3, borderWidth: 1.5, borderColor: selected === index ? colors.pine : colors.stone, borderRadius: 10, opacity: pressed ? 0.7 : 1 })}>
-        <Image source={photo} contentFit="cover" cachePolicy="memory-disk" style={{ width: '100%', height: '100%', borderRadius: 6 }} accessible={false} />
-      </Pressable>)}
+  // Compact galleries sit inside listing cards with dots; the hero fills the top of the stay
+  // page, under the status bar, with a counter and a row of thumbnails.
+  return <View onLayout={(event) => setWidth(event.nativeEvent.layout.width)}
+    style={[{ overflow: 'hidden', backgroundColor: colors.stone }, compact ? { aspectRatio: 1.7 } : { height: width * 0.92 + topInset }]}>
+    {width > 0 ? <ScrollView {...webInteractionProps} ref={gallery} horizontal pagingEnabled showsHorizontalScrollIndicator={false}
+      onScroll={trackScroll} scrollEventThrottle={16} onMomentumScrollEnd={trackScroll}
+      onScrollBeginDrag={pause} onTouchStart={pause} onPointerDown={pause}
+      style={{ flex: 1 }}>
+      {photos.map((photo, index) => onOpen ? <Pressable key={index} onPress={onOpen} onPressIn={pause}
+        accessibilityRole="button" accessibilityLabel={`View ${stay.name}, photo ${index + 1} of ${photos.length}`}
+        style={{ width, height: '100%' }}>
+        <Image source={photo} contentFit="cover" cachePolicy="memory-disk" transition={150} recyclingKey={`${stay.id}-${index}`} style={{ width: '100%', height: '100%' }} accessible={false} />
+      </Pressable> : <Image key={index} source={photo} contentFit="cover" cachePolicy="memory-disk" transition={150} style={{ width, height: '100%' }}
+        accessibilityLabel={`${stay.name}, photo ${index + 1} of ${photos.length}`} />)}
     </ScrollView> : null}
+
+    {!compact ? <>
+      <LinearGradient pointerEvents="none" colors={['rgba(0,0,0,0.38)', 'rgba(0,0,0,0)']} style={{ position: 'absolute', top: 0, left: 0, right: 0, height: topInset + 72 }} />
+      {showThumbs ? <LinearGradient pointerEvents="none" colors={['rgba(0,0,0,0)', 'rgba(0,0,0,0.42)']} style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 120 }} /> : null}
+      <View pointerEvents="none" style={{ position: 'absolute', right: 14, bottom: showThumbs ? 86 : 14, flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: 'rgba(0,0,0,0.72)', borderRadius: 9, borderCurve: 'continuous', paddingHorizontal: 10, paddingVertical: 6 }}>
+        <Icon name="image" size={14} color={colors.white} />
+        <Text accessibilityLabel={`Photo ${selected + 1} of ${photos.length}`} style={{ fontFamily: fonts.semibold, color: colors.white, fontSize: 13, fontVariant: ['tabular-nums'] }}>{selected + 1}/{photos.length}</Text>
+      </View>
+      {showThumbs && width > 0 ? <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ position: 'absolute', left: 0, right: 0, bottom: 12 }} contentContainerStyle={{ paddingHorizontal: 12, gap: 8 }}>
+        {photos.map((photo, index) => <Pressable key={index} accessibilityRole="button" accessibilityLabel={`Show photo ${index + 1} of ${stay.name}`}
+          accessibilityState={{ selected: selected === index }} onPress={() => selectPhoto(index)}
+          style={({ pressed }) => ({ width: thumbWidth, height: 62, borderRadius: 10, borderCurve: 'continuous', overflow: 'hidden', borderWidth: 2, borderColor: selected === index ? colors.white : 'rgba(255,255,255,0.25)', opacity: pressed ? 0.75 : 1 })}>
+          <Image source={photo} contentFit="cover" cachePolicy="memory-disk" style={{ width: '100%', height: '100%' }} accessible={false} />
+        </Pressable>)}
+      </ScrollView> : null}
+    </> : null}
+
+    {compact && hasSlides ? <View style={{ position: 'absolute', bottom: 0, alignSelf: 'center', flexDirection: 'row' }}>
+      {photos.map((_, index) => <Pressable key={index} accessibilityRole="button" accessibilityLabel={`${stay.name}: photo ${index + 1}`}
+        accessibilityState={{ selected: selected === index }} onPress={() => selectPhoto(index)}
+        style={{ width: 28, height: 36, alignItems: 'center', justifyContent: 'center' }}>
+        <View style={{ width: selected === index ? 8 : 6, height: selected === index ? 8 : 6, borderRadius: 4, backgroundColor: selected === index ? colors.white : 'rgba(255,255,255,0.6)', boxShadow: '0 1px 4px rgba(0,0,0,0.25)' }} />
+      </Pressable>)}
+    </View> : null}
   </View>;
 }
 

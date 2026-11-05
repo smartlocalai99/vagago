@@ -22,6 +22,8 @@
       },
       "permissions": [
         "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.ACCESS_COARSE_LOCATION",
         "android.permission.ACCESS_FINE_LOCATION"
       ]
     },
@@ -38,8 +40,8 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/icon.png",
-          "imageWidth": 200,
+          "image": "./assets/splash-mark.png",
+          "imageWidth": 120,
           "resizeMode": "contain",
           "backgroundColor": "#073728"
         }
@@ -68,6 +70,12 @@
         "projectId": "83cb1bae-c335-4d8d-ab03-f227c3147b4b"
       }
     },
-    "owner": "vardhanreddy"
+    "owner": "vardhanreddy",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/83cb1bae-c335-4d8d-ab03-f227c3147b4b"
+    }
   }
 }
