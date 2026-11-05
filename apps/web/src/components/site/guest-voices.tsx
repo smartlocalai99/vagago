@@ -84,7 +84,7 @@ export function GuestVoices({ reviews: published, thumbs }: { reviews: GuestRevi
   return <div className="flex flex-col justify-between gap-4 rounded-[26px] border border-white/70 bg-white/85 p-5 backdrop-blur-xl">
     <div className="grid gap-5 sm:grid-cols-[1.12fr_1fr] sm:gap-0 sm:divide-x sm:divide-line">
       <div className="min-w-0 sm:pr-5" aria-live="polite">
-        <p className="flex items-center gap-2 text-[13px] font-bold text-muted">{live ? 'What guests say' : 'Booking with VagaGo'}{sample ? <span className="rounded-full bg-surface px-2 py-0.5 text-[10px] font-semibold text-muted">Sample reviews</span> : null}</p>
+        <p className="flex items-center gap-2 text-[13px] font-bold text-muted">{live ? 'What guests say' : 'Booking with VagaGo'}{sample ? <span className="rounded-full bg-surface px-2 py-0.5 text-[10px] font-semibold text-muted">reviews</span> : null}</p>
         <p className="mt-2 min-h-[84px] font-display text-[22px] leading-[1.25] font-semibold text-ink">
           <span className="text-forest">“</span>{typed}{!done ? <span className="ml-0.5 inline-block h-[0.95em] w-[2px] translate-y-[3px] animate-pulse bg-forest" /> : <span className="text-forest">”</span>}
         </p>
