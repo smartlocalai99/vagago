@@ -3,6 +3,13 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import type { ReactNode } from 'react';
 
+export const navLinks = [
+  { href: '/stays/', label: 'Stays' },
+  { href: '/#places', label: 'Places to visit' },
+  { href: '/#how-it-works', label: 'How booking works' },
+  { href: '/trips/', label: 'My bookings' },
+];
+
 export function Logo({ light = false }: { light?: boolean }) {
   return <Link href="/" aria-label="VagaGo home" className="flex items-center gap-2.5">
     <span className={`grid size-9 place-items-center rounded-[10px] ${light ? 'bg-white/12' : 'bg-forest'}`}>
@@ -12,20 +19,13 @@ export function Logo({ light = false }: { light?: boolean }) {
   </Link>;
 }
 
-const nav = [
-  { href: '/stays/', label: 'Stays' },
-  { href: '/#places', label: 'Places to visit' },
-  { href: '/#how-it-works', label: 'How booking works' },
-  { href: '/trips/', label: 'My bookings' },
-];
-
 function Header() {
   const { asPath } = useRouter();
   return <header className="sticky top-0 z-40 border-b border-line bg-white/95 backdrop-blur">
     <div className="mx-auto flex h-16 max-w-[1200px] items-center justify-between gap-6 px-4 sm:px-6">
       <Logo />
       <nav aria-label="Main" className="hidden items-center gap-1 md:flex">
-        {nav.map((item) => {
+        {navLinks.map((item) => {
           const current = item.href !== '/#places' && item.href !== '/#how-it-works' && asPath.startsWith(item.href);
           return <Link key={item.href} href={item.href} aria-current={current ? 'page' : undefined}
             className={`rounded-full px-4 py-2 text-[15px] font-semibold transition-colors hover:bg-surface ${current ? 'text-forest' : 'text-ink'}`}>{item.label}</Link>;
@@ -56,6 +56,7 @@ function Footer() {
         <ul className="space-y-2 text-[15px] text-white/75">
           <li><Link href="/trips/" className="hover:text-white">My bookings</Link></li>
           <li><Link href="/#how-it-works" className="hover:text-white">How booking works</Link></li>
+          <li><Link href="/credits/" className="hover:text-white">Photo credits</Link></li>
         </ul>
       </div>
     </div>
@@ -65,7 +66,7 @@ function Footer() {
   </footer>;
 }
 
-export function SiteLayout({ title, description, image, children, bare = false }: { title: string; description: string; image?: string; children: ReactNode; bare?: boolean }) {
+export function SiteLayout({ title, description, image, children, bare = false, header = true }: { title: string; description: string; image?: string; children: ReactNode; bare?: boolean; header?: boolean }) {
   const fullTitle = title === 'VagaGo' ? 'VagaGo: affordable stays in Vagamon' : `${title} | VagaGo`;
   return <div className="flex min-h-dvh flex-col bg-white text-ink">
     <Head>
@@ -78,7 +79,7 @@ export function SiteLayout({ title, description, image, children, bare = false }
       <meta name="theme-color" content="#FFFFFF" />
       <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
     </Head>
-    <Header />
+    {header ? <Header /> : null}
     <main className="flex-1">{children}</main>
     {bare ? null : <Footer />}
   </div>;

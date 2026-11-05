@@ -11,3 +11,6 @@ output/playwright/
 .playwright-cli/
 ios/
 android/
+
+# Local screen recordings used as design references
+apps/web/public/*.mov

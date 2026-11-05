@@ -7,6 +7,7 @@ import { TripStatus } from '@/components/site/trip-status';
 import { fullDate, money, todayInIndia } from '@/lib/format';
 import { guest, hasGuestSession, tripColumns, type Trip } from '@/lib/guest';
 import { photoUrl, type Place } from '@/lib/listings';
+import { placePhoto } from '@/lib/places';
 import { formatDrive, formatKm, nearby } from '@/lib/trip';
 
 type Address = { address_line: string; city: string; state: string; postal_code: string; latitude: number; longitude: number; arrival_instructions: string | null; contact_phone: string | null };
@@ -102,8 +103,9 @@ export default function TripPage() {
         <h2 className="text-[20px] font-bold">Places to visit nearby</h2>
         <p className="mt-1 text-[15px] text-muted">Approximate road distance and drive time from your stay.</p>
         <ul className="mt-3 grid gap-x-8 sm:grid-cols-2">
-          {near.map((place) => <li key={place.id}><a href={`https://www.google.com/maps/dir/?api=1&origin=${destination}&destination=${place.latitude},${place.longitude}&travelmode=driving`} target="_blank" rel="noreferrer" className="flex items-center gap-3 border-b border-line py-3.5 hover:bg-surface">
-            <Icon name="pin" size={18} className="shrink-0 text-muted" />
+          {near.map((place) => <li key={place.id}><a href={`https://www.google.com/maps/dir/?api=1&origin=${destination}&destination=${place.latitude},${place.longitude}&travelmode=driving`} target="_blank" rel="noreferrer" className="flex items-center gap-3 border-b border-line py-3 hover:bg-surface">
+            {placePhoto(place.id) ? <img src={placePhoto(place.id)!} alt="" loading="lazy" className="size-12 shrink-0 rounded-xl object-cover" />
+              : <span className="grid size-12 shrink-0 place-items-center rounded-xl bg-forest-soft text-forest"><Icon name="pin" size={18} /></span>}
             <div className="min-w-0 flex-1"><p className="text-[15px] font-bold">{place.name}</p><p className="text-[13px] text-muted">{place.kind}</p></div>
             <div className="text-right tabular-nums"><p className="text-[15px] font-bold">{formatKm(place.roadKm)}</p><p className="text-[13px] text-muted">about {formatDrive(place.driveMinutes)}</p></div>
           </a></li>)}

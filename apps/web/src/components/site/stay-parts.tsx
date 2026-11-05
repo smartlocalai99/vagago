@@ -48,7 +48,7 @@ const fieldLabel = 'block text-[12px] font-bold text-muted';
 const fieldInput = 'mt-1 w-full bg-transparent text-[16px] font-semibold text-ink outline-none';
 
 // Booking-site search: what or where, dates and guests. Results open on /stays.
-export function SearchForm({ trip, query = '', compact = false }: { trip: TripQuery; query?: string; compact?: boolean }) {
+export function SearchForm({ trip, query = '', variant = 'card' }: { trip: TripQuery; query?: string; variant?: 'card' | 'compact' | 'glass' }) {
   const router = useRouter();
   const [q, setQ] = useState(query);
   const [checkIn, setCheckIn] = useState(trip.checkIn);
@@ -65,9 +65,13 @@ export function SearchForm({ trip, query = '', compact = false }: { trip: TripQu
     void router.push({ pathname: '/stays/', query: { ...(q.trim() ? { q: q.trim() } : {}), in: checkIn, out: checkOut, guests } });
   };
 
-  const cell = `rounded-xl px-4 py-2.5 ${compact ? 'border border-line' : 'hover:bg-surface'} focus-within:bg-surface`;
+  const glass = variant === 'glass';
+  const cell = glass ? 'rounded-2xl px-4 py-2 hover:bg-white/60 focus-within:bg-white/70 md:rounded-full'
+    : `rounded-xl px-4 py-2.5 ${variant === 'compact' ? 'border border-line' : 'hover:bg-surface'} focus-within:bg-surface`;
+  const shell = glass ? 'rounded-[26px] border border-white/70 bg-white/80 shadow-[0_12px_40px_rgba(0,0,0,0.14)] backdrop-blur-xl md:rounded-full'
+    : `rounded-2xl bg-white ${variant === 'compact' ? '' : 'shadow-[0_10px_40px_rgba(0,0,0,0.18)]'}`;
   return <form onSubmit={submit} role="search" aria-label="Search stays"
-    className={`grid gap-2 rounded-2xl bg-white p-2 ${compact ? '' : 'shadow-[0_10px_40px_rgba(0,0,0,0.18)]'} md:grid-cols-[1.6fr_1fr_1fr_0.8fr_auto] md:items-center`}>
+    className={`grid gap-2 p-2 ${shell} md:grid-cols-[1.6fr_1fr_1fr_0.8fr_auto] md:items-center`}>
     <label className={cell}><span className={fieldLabel}>Where in Vagamon</span>
       <input value={q} onChange={(event) => setQ(event.target.value)} maxLength={120} placeholder="Any stay or place, e.g. Pine Forest" className={`${fieldInput} placeholder:font-medium placeholder:text-muted`} />
     </label>
@@ -84,7 +88,7 @@ export function SearchForm({ trip, query = '', compact = false }: { trip: TripQu
         {Array.from({ length: 12 }, (_, index) => index + 1).map((count) => <option key={count} value={count}>{count} {count === 1 ? 'guest' : 'guests'}</option>)}
       </select>
     </label>
-    <button type="submit" className="flex min-h-14 items-center justify-center gap-2 rounded-xl bg-action px-7 text-[16px] font-bold text-white transition-opacity hover:opacity-90">
+    <button type="submit" className={`flex min-h-14 items-center justify-center gap-2 px-7 text-[16px] font-bold text-white transition-opacity hover:opacity-90 ${glass ? 'rounded-2xl bg-forest md:rounded-full' : 'rounded-xl bg-action'}`}>
       <Icon name="search" size={20} />Search
     </button>
   </form>;

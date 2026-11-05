@@ -46,7 +46,7 @@ export default function Stays({ stays }: Props) {
   return <SiteLayout title="Stays in Vagamon" description="Compare cottages, homestays and villas in Vagamon with nightly prices for your dates. Pay at the stay.">
     <div className="border-b border-line bg-surface">
       <div className="mx-auto max-w-[1200px] px-4 py-5 sm:px-6">
-        <SearchForm key={router.isReady ? router.asPath : 'initial'} trip={trip} query={typeof router.query.q === 'string' ? router.query.q : ''} compact />
+        <SearchForm key={router.isReady ? router.asPath : 'initial'} trip={trip} query={typeof router.query.q === 'string' ? router.query.q : ''} variant="compact" />
       </div>
     </div>
     <section className="mx-auto max-w-[1200px] px-4 pt-8 sm:px-6">

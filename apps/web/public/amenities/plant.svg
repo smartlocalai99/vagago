@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 160" width="200" height="160"><defs>
+<linearGradient id="plat" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#454C4A"/><stop offset="1" stop-color="#1E2322"/></linearGradient>
+<linearGradient id="white" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#D9DEDC"/></linearGradient>
+<linearGradient id="whiteSide" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#E4E8E6"/><stop offset="1" stop-color="#B9C0BD"/></linearGradient>
+<linearGradient id="red" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F0506B"/><stop offset="1" stop-color="#B51E3A"/></linearGradient>
+<linearGradient id="green" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2E8A5E"/><stop offset="1" stop-color="#0B4A34"/></linearGradient>
+<linearGradient id="dark" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4A5250"/><stop offset="1" stop-color="#1C2120"/></linearGradient>
+<linearGradient id="flame" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#D92848"/><stop offset=".6" stop-color="#F26B3A"/><stop offset="1" stop-color="#F6BB45"/></linearGradient>
+<linearGradient id="wood" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9A6A42"/><stop offset="1" stop-color="#5E3D22"/></linearGradient>
+<linearGradient id="gold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFD978"/><stop offset="1" stop-color="#E29A12"/></linearGradient>
+<radialGradient id="ball" cx=".35" cy=".3" r=".75"><stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#C9D0CD"/></radialGradient>
+<filter id="soft" x="-20%" y="-20%" width="140%" height="160%"><feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#000" flood-opacity=".18"/></filter>
+</defs><ellipse cx="100" cy="134" rx="74" ry="19" fill="#151918"/>
+<ellipse cx="100" cy="127" rx="74" ry="19" fill="url(#plat)"/>
+<path d="M30 124 A74 19 0 0 0 170 124" fill="none" stroke="#D92848" stroke-width="2.5" opacity=".9"/><g filter="url(#soft)">
+  <path d="M74 92 L126 92 L118 128 Q116 132 100 132 Q84 132 82 128 Z" fill="url(#red)"/>
+  <rect x="70" y="86" width="60" height="12" rx="5" fill="#B51E3A"/>
+  <path d="M100 88 C98 64 100 50 100 36" stroke="#1F6B47" stroke-width="5" fill="none"/>
+  <path d="M100 58 C80 58 66 46 64 30 C84 30 98 40 100 58Z" fill="url(#green)"/>
+  <path d="M100 70 C120 70 136 58 138 40 C118 40 102 50 100 70Z" fill="url(#green)"/>
+  <path d="M100 44 C92 36 92 24 100 14 C108 24 108 36 100 44Z" fill="#3FA06E"/></g></svg>

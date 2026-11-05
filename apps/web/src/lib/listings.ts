@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './database.types';
+import { amenityArt } from './places';
 
 type StayStyle = Database['public']['Enums']['stay_style'];
 
@@ -97,4 +98,12 @@ export const styleLabel: Record<StayStyle, string> = { villa: 'Villa', cottage: 
 
 export function discountPercent(rate: number, compareAt: number | null) {
   return compareAt && compareAt > rate ? Math.round((1 - rate / compareAt) * 100) : 0;
+}
+
+// The amenities most often found at live stays, with how many stays offer each.
+export async function fetchAmenityHighlights(listings: Listing[], limit = 5) {
+  const { data, error } = await db().from('amenities').select('name, icon');
+  if (error) throw new Error(error.message);
+  return data.map((row) => ({ name: row.name, art: amenityArt(row.name, row.icon), stays: listings.filter((stay) => stay.amenities.includes(row.name)).length }))
+    .filter((row) => row.stays > 0).sort((a, b) => b.stays - a.stays || a.name.localeCompare(b.name)).slice(0, limit);
 }

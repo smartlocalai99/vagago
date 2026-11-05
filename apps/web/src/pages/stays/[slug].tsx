@@ -8,6 +8,7 @@ import { SiteLayout } from '@/components/site/layout';
 import { Chip, DealPrice } from '@/components/site/stay-parts';
 import { money, todayInIndia } from '@/lib/format';
 import { guest } from '@/lib/guest';
+import { placePhoto } from '@/lib/places';
 import { fetchListing, fetchPlaces, fetchSlugs, styleLabel, type Listing, type Photo, type Place, type Room } from '@/lib/listings';
 import { addDays, formatDrive, formatKm, nearby, nightsBetween, readTrip, tripParams, tripProblem, type TripQuery } from '@/lib/trip';
 
@@ -241,8 +242,9 @@ export default function StayPage({ stay, places }: Props) {
             <h2 className="text-[24px] font-extrabold tracking-[-0.02em]">Places to visit nearby</h2>
             <p className="mt-1 text-[15px] text-muted">Approximate road distance and drive time from {stay.name}.</p>
             <ul className="mt-3 grid gap-x-8 sm:grid-cols-2">
-              {near.map((place) => <li key={place.id} className="flex items-center gap-3 border-b border-line py-3.5">
-                <Icon name="pin" size={18} className="shrink-0 text-muted" />
+              {near.map((place) => <li key={place.id} className="flex items-center gap-3 border-b border-line py-3">
+                {placePhoto(place.id) ? <img src={placePhoto(place.id)!} alt="" loading="lazy" className="size-12 shrink-0 rounded-xl object-cover" />
+                  : <span className="grid size-12 shrink-0 place-items-center rounded-xl bg-forest-soft text-forest"><Icon name="pin" size={18} /></span>}
                 <div className="min-w-0 flex-1"><p className="text-[15px] font-bold">{place.name}</p><p className="text-[13px] text-muted">{place.kind}</p></div>
                 <div className="text-right tabular-nums"><p className="text-[15px] font-bold">{formatKm(place.roadKm)}</p><p className="text-[13px] text-muted">about {formatDrive(place.driveMinutes)}</p></div>
               </li>)}
