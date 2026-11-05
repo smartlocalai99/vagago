@@ -54,14 +54,17 @@ function useTypewriter(slides: Slide[], reduced: boolean) {
   return { index, typed: reduced ? text : text.slice(0, shown), done: reduced || phase !== 'typing' };
 }
 
-function Stars({ value, play, delay }: { value: number | null; play: boolean; delay: number }) {
-  const percent = value === null ? 0 : (value / 5) * 100;
-  return <span className="relative inline-flex" aria-hidden>
-    <span className="flex gap-0.5 text-[#C2C9C6]">{[0, 1, 2, 3, 4].map((star) => <Icon key={star} name="star" size={15} />)}</span>
-    <span className="absolute inset-y-0 left-0 flex gap-0.5 overflow-hidden text-[#E9A23B] transition-[width] duration-700 ease-out [&_path]:fill-current"
-      style={{ width: play ? `${percent}%` : '0%', transitionDelay: `${delay}ms` }}>
-      {[0, 1, 2, 3, 4].map((star) => <Icon key={star} name="star" size={15} className="shrink-0" />)}
-    </span>
+// Golden stars that pop in one after another each time the quote changes. Each star fills
+// by the review's score; with no reviews yet they stay as golden outlines.
+function Stars({ value, delay }: { value: number | null; delay: number }) {
+  return <span className="flex gap-0.5 text-[#E9A23B]" aria-hidden>
+    {[0, 1, 2, 3, 4].map((star) => {
+      const fill = value === null ? 0 : Math.min(1, Math.max(0, value - star));
+      return <span key={star} className="star-pop relative inline-flex" style={{ animationDelay: `${delay + star * 70}ms` }}>
+        <Icon name="star" size={15} />
+        {fill > 0 ? <span className="absolute inset-y-0 left-0 overflow-hidden [&_path]:fill-current" style={{ width: `${fill * 100}%` }}><Icon name="star" size={15} className="shrink-0" /></span> : null}
+      </span>;
+    })}
   </span>;
 }
 
@@ -73,12 +76,6 @@ export function GuestVoices({ reviews, thumbs }: { reviews: GuestReview[]; thumb
     : promises;
   const { index, typed, done } = useTypewriter(slides, reduced);
   const slide = slides[index];
-  // Stars refill each time a new review starts typing.
-  const [playKey, setPlayKey] = useState(-1);
-  useEffect(() => {
-    const frame = requestAnimationFrame(() => setPlayKey(index));
-    return () => cancelAnimationFrame(frame);
-  }, [index]);
 
   return <div className="flex flex-col justify-between gap-4 rounded-[26px] border border-white/70 bg-white/85 p-5 backdrop-blur-xl">
     <div className="grid gap-5 sm:grid-cols-[1.12fr_1fr] sm:gap-0 sm:divide-x sm:divide-line">
@@ -98,7 +95,7 @@ export function GuestVoices({ reviews, thumbs }: { reviews: GuestReview[]; thumb
             return <li key={name} className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
               <span className="text-[14px] font-semibold">{name}</span>
               <span className="flex items-center gap-2">
-                <Stars key={`${index}-${row}`} value={value} play={playKey === index} delay={row * 140} />
+                <Stars key={`${index}-${row}`} value={value} delay={row * 160} />
                 {value === null ? <span className="rounded-full bg-forest-soft px-2 py-0.5 text-[11px] font-bold text-forest">New</span>
                   : <span className="w-7 text-right text-[14px] font-extrabold tabular-nums" aria-label={`${name} ${value} out of 5`}>{value.toFixed(1)}</span>}
               </span>

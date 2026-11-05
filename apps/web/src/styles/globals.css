@@ -45,4 +45,11 @@ input, select, textarea { font-size: 16px; }
 
 html { scroll-behavior: smooth; }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
-:focus-visible { outline: 2px solid var(--color-forest); outline-offset: 2px; }
+:focus { outline: none; }
+/* Keyboard users still get a ring on buttons and links; clicks and form fields show none. */
+:is(a, button, summary, [role='button']):focus-visible { outline: 2px solid var(--color-forest); outline-offset: 2px; }
+input, select, textarea { outline: none; }
+
+@keyframes star-pop { 0% { transform: scale(0.3); opacity: 0; } 60% { transform: scale(1.2); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }
+.star-pop { animation: star-pop 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+@media (prefers-reduced-motion: reduce) { .star-pop { animation: none; } }

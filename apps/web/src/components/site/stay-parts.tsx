@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { useState, type FormEvent } from 'react';
+import { useState, type FormEvent, type MouseEvent } from 'react';
 import { Icon, type IconName } from '@/components/icons';
 import { money, todayInIndia } from '@/lib/format';
 import { discountPercent, styleLabel, type Listing } from '@/lib/listings';
@@ -65,26 +65,36 @@ export function SearchForm({ trip, query = '', variant = 'card' }: { trip: TripQ
     void router.push({ pathname: '/stays/', query: { ...(q.trim() ? { q: q.trim() } : {}), in: checkIn, out: checkOut, guests } });
   };
 
+  // The whole field works like a button: clicking anywhere in it focuses the input or
+  // opens the date or guest picker.
+  const openField = (event: MouseEvent<HTMLLabelElement>) => {
+    const field = event.currentTarget.querySelector('input, select') as HTMLInputElement | HTMLSelectElement | null;
+    if (!field) return;
+    field.focus();
+    if ((field.type === 'date' || field.tagName === 'SELECT') && 'showPicker' in field) {
+      try { field.showPicker(); } catch { /* already open or not allowed */ }
+    }
+  };
   const glass = variant === 'glass';
-  const cell = glass ? 'rounded-2xl px-4 py-2 hover:bg-white/60 focus-within:bg-white/70 md:rounded-full'
-    : `rounded-xl px-4 py-2.5 ${variant === 'compact' ? 'border border-line' : 'hover:bg-surface'} focus-within:bg-surface`;
+  const cell = glass ? 'cursor-pointer rounded-2xl px-4 py-2 hover:bg-white/60 focus-within:bg-white/70 md:rounded-full'
+    : `cursor-pointer rounded-xl px-4 py-2.5 ${variant === 'compact' ? 'border border-line' : 'hover:bg-surface'} focus-within:bg-surface`;
   const shell = glass ? 'rounded-[26px] border border-white/70 bg-white/80 shadow-[0_12px_40px_rgba(0,0,0,0.14)] backdrop-blur-xl md:rounded-full'
     : `rounded-2xl bg-white ${variant === 'compact' ? '' : 'shadow-[0_10px_40px_rgba(0,0,0,0.18)]'}`;
   return <form onSubmit={submit} role="search" aria-label="Search stays"
     className={`grid gap-2 p-2 ${shell} md:grid-cols-[1.6fr_1fr_1fr_0.8fr_auto] md:items-center`}>
-    <label className={cell}><span className={fieldLabel}>Where in Vagamon</span>
+    <label className={cell} onClick={openField}><span className={fieldLabel}>Where in Vagamon</span>
       <input value={q} onChange={(event) => setQ(event.target.value)} maxLength={120} placeholder="Any stay or place, e.g. Pine Forest" className={`${fieldInput} placeholder:font-medium placeholder:text-muted`} />
     </label>
     <div className="grid grid-cols-2 gap-2 md:contents">
-      <label className={cell}><span className={fieldLabel}>Check-in</span>
-        <input type="date" required min={today} value={checkIn} onChange={(event) => changeCheckIn(event.target.value)} className={fieldInput} />
+      <label className={cell} onClick={openField}><span className={fieldLabel}>Check-in</span>
+        <input type="date" required min={today} value={checkIn} onChange={(event) => changeCheckIn(event.target.value)} className={`${fieldInput} cursor-pointer`} />
       </label>
-      <label className={cell}><span className={fieldLabel}>Check-out</span>
-        <input type="date" required min={checkIn ? addDays(checkIn, 1) : today} value={checkOut} onChange={(event) => setCheckOut(event.target.value)} className={fieldInput} />
+      <label className={cell} onClick={openField}><span className={fieldLabel}>Check-out</span>
+        <input type="date" required min={checkIn ? addDays(checkIn, 1) : today} value={checkOut} onChange={(event) => setCheckOut(event.target.value)} className={`${fieldInput} cursor-pointer`} />
       </label>
     </div>
-    <label className={cell}><span className={fieldLabel}>Guests</span>
-      <select value={guests} onChange={(event) => setGuests(Number(event.target.value))} className={`${fieldInput} appearance-none`}>
+    <label className={cell} onClick={openField}><span className={fieldLabel}>Guests</span>
+      <select value={guests} onChange={(event) => setGuests(Number(event.target.value))} className={`${fieldInput} cursor-pointer appearance-none`}>
         {Array.from({ length: 12 }, (_, index) => index + 1).map((count) => <option key={count} value={count}>{count} {count === 1 ? 'guest' : 'guests'}</option>)}
       </select>
     </label>
