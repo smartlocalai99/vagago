@@ -68,7 +68,7 @@ function RoundButton({ icon, label, onPress }: { icon: 'back' | 'share'; label: 
   </Pressable>;
 }
 
-function StayDetailContent({ stay }: { stay: Stay }) {
+function StayDetailContent({ stay, initialPhoto }: { stay: Stay; initialPhoto: number }) {
   const { draft, updateDraft } = useEscape();
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
@@ -97,7 +97,7 @@ function StayDetailContent({ stay }: { stay: Stay }) {
     <StatusBar style={solidHeader ? 'dark' : 'light'} />
     <ScrollView style={{ flex: 1 }} contentInsetAdjustmentBehavior="never" contentContainerStyle={{ paddingBottom: 28 }} scrollEventThrottle={16}
       onScroll={(event) => { const solid = event.nativeEvent.contentOffset.y > solidAfter; if (solid !== solidHeader) setSolidHeader(solid); }}>
-      <StayGallery stay={stay} topInset={insets.top} />
+      <StayGallery stay={stay} topInset={insets.top} initialIndex={initialPhoto} />
       <View style={{ paddingHorizontal: 18, paddingTop: 18, gap: 24 }}>
         <Reveal style={{ gap: 10 }}>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
@@ -185,10 +185,10 @@ function StayDetailContent({ stay }: { stay: Stay }) {
 }
 
 export default function StayDetails() {
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { id, photo } = useLocalSearchParams<{ id: string; photo?: string }>();
   const { stays, ready } = useCatalog();
   const stay = stays.find((item) => item.id === id);
   if (!stay && !ready) return <Page><Stack.Screen options={{ headerShown: true, title: 'Property details' }} /></Page>;
   if (!stay) return <Page><Stack.Screen options={{ headerShown: true, title: 'Property details' }} /><EmptyState title="Stay not found" body="This property is no longer listed." action="Explore stays" onAction={() => router.replace('/')} icon="search" /></Page>;
-  return <StayDetailContent key={stay.id} stay={stay} />;
+  return <StayDetailContent key={stay.id} stay={stay} initialPhoto={Number(photo) || 0} />;
 }

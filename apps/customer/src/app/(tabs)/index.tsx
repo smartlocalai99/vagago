@@ -4,12 +4,11 @@ import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { validateGetawayDraft } from '@vagago/domain';
 import { AppText, EmptyState, Heading, StayCard } from '@/components/ui';
-import { DealCarousel } from '@/components/deal-carousel';
 import { Faq, PlacesRow, SectionTitle, WhyVagaGo } from '@/components/explore-sections';
 import { Reveal } from '@/components/motion';
 import { Icon, type IconName } from '@/components/icon';
 import { SortSheet } from '@/components/sort-sheet';
-import { discountPercent, matchStays, sortOptions, sortStays, type SortId } from '@/data/search';
+import { matchStays, sortOptions, sortStays, type SortId } from '@/data/search';
 import { useCatalog } from '@/state/catalog-context';
 import { useEscape } from '@/state/escape-context';
 import { colors, fonts } from '@/theme';
@@ -35,8 +34,6 @@ export default function Explore() {
   const [sort, setSort] = useState<SortId>('recommended');
   const [sorting, setSorting] = useState(false);
   const results = sortStays(matchStays(stays, draft), sort);
-  const deals = draft.query ? [] : results.filter((stay) => discountPercent(stay.nightlyRate, stay.compareAtRate) > 0)
-    .sort((a, b) => discountPercent(b.nightlyRate, b.compareAtRate) - discountPercent(a.nightlyRate, a.compareAtRate) || a.nightlyRate - b.nightlyRate);
   const valid = validateGetawayDraft(draft).valid;
   const editSearch = () => router.push('/search');
   const dates = `${shortDate(draft.checkIn)} – ${shortDate(draft.checkOut)}`;
@@ -77,10 +74,6 @@ export default function Explore() {
         <PlacesRow delay={260} />
       </View> : null}
 
-      {deals.length >= 2 ? <View style={{ gap: 4, paddingBottom: 18 }}>
-        <Reveal delay={420}><SectionTitle>Biggest savings</SectionTitle></Reveal>
-        <Reveal delay={480} from="right"><DealCarousel stays={deals} /></Reveal>
-      </View> : null}
 
       <Reveal delay={560} style={{ flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between', gap: 12, paddingHorizontal: 16, paddingBottom: 12 }}>
         <Heading size={19}>{results.length} {results.length === 1 ? 'stay' : 'stays'} in Vagamon</Heading>

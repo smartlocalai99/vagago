@@ -1,4 +1,4 @@
-import type { PropsWithChildren } from 'react';
+import { useCallback, useRef, type PropsWithChildren } from 'react';
 import { Pressable, ScrollView, Text, View, type TextStyle, type ViewStyle } from 'react-native';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -7,6 +7,7 @@ import { Icon, type IconName } from '@/components/icon';
 import { StayGallery } from '@/components/stay-gallery';
 import { DealPrice } from '@/components/price-display';
 import { PressScale } from '@/components/motion';
+import { useExpand } from '@/components/expand-transition';
 import { colors, fonts } from '@/theme';
 import { money } from '@/data/stays';
 import { useEscape } from '@/state/escape-context';
@@ -53,11 +54,24 @@ export function Chip({ label, icon, tone = 'neutral' }: { label: string; icon?: 
 export function StayCard({ stay, style }: { stay: Stay; style?: ViewStyle }) {
   const { draft } = useEscape();
   const estimate = estimateStaySubtotal(stay.nightlyRate, draft.checkIn, draft.checkOut);
-  const openStay = () => router.push(`/stay/${stay.id}`);
+  const expand = useExpand();
+  const photoBox = useRef<View>(null);
+  const photoIndex = useRef(0);
+  const onIndexChange = useCallback((index: number) => { photoIndex.current = index; }, []);
+  const openStay = () => {
+    const index = photoIndex.current;
+    const href = `/stay/${stay.id}?photo=${index}` as const;
+    const source = stay.gallery[index] ?? stay.image;
+    if (!photoBox.current) return router.push(href);
+    photoBox.current.measureInWindow((x, y, width, height) => {
+      expand(source, { x, y, width, height });
+      router.push(href);
+    });
+  };
   return <PressScale accessibilityRole="button" accessibilityLabel={`View ${stay.name} details`} onPress={openStay} scaleTo={0.97}
     style={[{ marginHorizontal: 12, marginBottom: 16, borderRadius: 18, borderCurve: 'continuous', backgroundColor: colors.white, boxShadow: '0 2px 12px rgba(0,0,0,0.09)' }, style]}>
-    <View style={{ borderTopLeftRadius: 18, borderTopRightRadius: 18, overflow: 'hidden' }}>
-      <StayGallery stay={stay} compact />
+    <View ref={photoBox} collapsable={false} style={{ borderTopLeftRadius: 18, borderTopRightRadius: 18, overflow: 'hidden' }}>
+      <StayGallery stay={stay} compact onIndexChange={onIndexChange} />
       <View pointerEvents="none" style={{ position: 'absolute', top: 12, left: 12, flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: colors.white, borderRadius: 6, paddingHorizontal: 8, paddingVertical: 4 }}>
         <Icon name="home" size={13} color={colors.ink} />
         <Text style={{ fontFamily: fonts.semibold, fontSize: 12, lineHeight: 16, color: colors.ink }}>{stayStyleLabel(stay)}</Text>

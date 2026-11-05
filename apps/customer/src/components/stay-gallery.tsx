@@ -7,14 +7,16 @@ import { Icon } from '@/components/icon';
 import { colors, fonts } from '@/theme';
 import type { Stay } from '@/types';
 
-type GalleryProps = { stay: Stay; compact?: boolean; topInset?: number; onOpen?: () => void };
+type GalleryProps = { stay: Stay; compact?: boolean; topInset?: number; onOpen?: () => void; initialIndex?: number; onIndexChange?: (index: number) => void };
 
-function Gallery({ stay, compact = false, topInset = 0, onOpen }: GalleryProps) {
+function Gallery({ stay, compact = false, topInset = 0, onOpen, initialIndex = 0, onIndexChange }: GalleryProps) {
   const photos = stay.gallery.length ? stay.gallery : [stay.image];
+  const startIndex = Math.min(Math.max(initialIndex, 0), photos.length - 1);
   const gallery = useRef<ScrollView>(null);
-  const selectedRef = useRef(0);
+  const selectedRef = useRef(startIndex);
   const targetRef = useRef<number | null>(null);
-  const [selected, setSelected] = useState(0);
+  const [selected, setSelected] = useState(startIndex);
+  useEffect(() => { onIndexChange?.(selected); }, [onIndexChange, selected]);
   const [width, setWidth] = useState(0);
   const [interacted, setInteracted] = useState(false);
   const [advances, setAdvances] = useState(0);

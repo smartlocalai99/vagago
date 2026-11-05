@@ -67,22 +67,19 @@ export function WhyVagaGo({ stays }: { stays: Stay[] }) {
     {popular.length ? <>
       <Text style={{ fontFamily: fonts.regular, fontSize: 13, color: colors.fern, paddingHorizontal: 16, marginTop: 6 }}>Popular at our stays</Text>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 16, gap: 12 }}>
-        {popular.map(([name, count]) => {
+        {popular.map(([name]) => {
           const art = amenityArt(name);
-          const caption = `At ${count} ${count === 1 ? 'stay' : 'stays'}`;
           return art.photo
             ? <View key={name} style={{ width: 150, height: 170, borderRadius: 24, borderCurve: 'continuous', overflow: 'hidden', backgroundColor: colors.stone }}>
               <Image source={{ uri: art.uri }} contentFit="cover" cachePolicy="memory-disk" transition={200} accessible={false} style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }} />
               <LinearGradient colors={['rgba(0,0,0,0)', 'rgba(0,0,0,0.72)']} locations={[0.4, 1]} style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }} />
               <View style={{ position: 'absolute', left: 12, right: 12, bottom: 12 }}>
                 <Text numberOfLines={1} style={{ fontFamily: fonts.bold, fontSize: 15, color: colors.white }}>{name}</Text>
-                <Text style={{ fontFamily: fonts.regular, fontSize: 11, color: 'rgba(255,255,255,0.8)' }}>{caption}</Text>
               </View>
             </View>
             : <View key={name} style={{ width: 150, height: 170, borderRadius: 24, borderCurve: 'continuous', backgroundColor: '#F1F2F1', alignItems: 'center', justifyContent: 'center', padding: 10 }}>
               <Image source={{ uri: art.uri }} contentFit="contain" cachePolicy="memory-disk" accessible={false} style={{ width: 108, height: 86 }} />
               <Text numberOfLines={1} style={{ fontFamily: fonts.bold, fontSize: 14, color: colors.ink, marginTop: 8 }}>{name}</Text>
-              <Text style={{ fontFamily: fonts.regular, fontSize: 11, color: colors.fern }}>{caption}</Text>
             </View>;
         })}
       </ScrollView>

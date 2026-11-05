@@ -11,7 +11,6 @@ export const sortOptions = [
   { id: 'recommended', label: 'Recommended' },
   { id: 'low', label: 'Price: low to high' },
   { id: 'high', label: 'Price: high to low' },
-  { id: 'savings', label: 'Biggest savings' },
 ] as const;
 export type SortId = (typeof sortOptions)[number]['id'];
 
@@ -23,7 +22,6 @@ export function sortStays(stays: Stay[], sort: SortId): Stay[] {
   if (sort === 'recommended') return stays;
   const sorted = [...stays];
   if (sort === 'low') sorted.sort((a, b) => a.nightlyRate - b.nightlyRate);
-  else if (sort === 'high') sorted.sort((a, b) => b.nightlyRate - a.nightlyRate);
-  else sorted.sort((a, b) => discountPercent(b.nightlyRate, b.compareAtRate) - discountPercent(a.nightlyRate, a.compareAtRate) || a.nightlyRate - b.nightlyRate);
+  else sorted.sort((a, b) => b.nightlyRate - a.nightlyRate);
   return sorted;
 }
