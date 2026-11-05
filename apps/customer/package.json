@@ -42,7 +42,8 @@
     "web": "expo start --web",
     "typecheck": "tsc --noEmit",
     "lint": "expo lint",
-    "export": "expo export --platform all"
+    "export": "expo export --platform all",
+    "update": "npx eas-cli@latest update --channel production --platform ios"
   },
   "private": true
 }
