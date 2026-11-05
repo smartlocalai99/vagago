@@ -2,9 +2,9 @@ import { useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
-import Animated, { FadeIn, LinearTransition, useAnimatedStyle, withSpring } from 'react-native-reanimated';
+import Animated, { FadeIn, LinearTransition, useAnimatedStyle, withTiming } from 'react-native-reanimated';
 import { Icon, type IconName } from '@/components/icon';
-import { Reveal, settle } from '@/components/motion';
+import { ease, Reveal } from '@/components/motion';
 import { openDirections } from '@/components/directions';
 import { formatDrive, formatKm, nearbyAttractions, useAttractions } from '@/data/attractions';
 import { faqs } from '@/data/faq';
@@ -27,7 +27,7 @@ export function PlacesRow({ delay = 0 }: { delay?: number }) {
   return <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 16, gap: 12 }}>
     {places.map((place, index) => {
       const photo = placePhotoUrl(place.id);
-      return <Reveal key={place.id} from="small" delay={delay + index * 60}>
+      return <Reveal key={place.id} from="fade" duration={420} delay={delay + index * 90}>
         <Pressable accessibilityRole="button" accessibilityLabel={`${place.name}, ${formatKm(place.roadKm)} from Vagamon town. Open directions`}
           onPress={() => void openDirections(place.coordinates)} style={({ pressed }) => ({ width: 84, gap: 6, opacity: pressed ? 0.7 : 1 })}>
           {photo ? <Image source={{ uri: photo }} contentFit="cover" cachePolicy="memory-disk" transition={200} accessible={false}
@@ -89,8 +89,8 @@ export function WhyVagaGo({ stays }: { stays: Stay[] }) {
 
 function FaqItem({ q, a }: { q: string; a: string }) {
   const [open, setOpen] = useState(false);
-  const chevron = useAnimatedStyle(() => ({ transform: [{ rotate: withSpring(open ? '-90deg' : '90deg', settle) }] }));
-  return <Animated.View layout={LinearTransition.springify().damping(settle.damping)} style={{ borderBottomWidth: 1, borderColor: colors.stone, overflow: 'hidden' }}>
+  const chevron = useAnimatedStyle(() => ({ transform: [{ rotate: withTiming(open ? '-90deg' : '90deg', { duration: 260, easing: ease }) }] }));
+  return <Animated.View layout={LinearTransition.duration(280).easing(ease)} style={{ borderBottomWidth: 1, borderColor: colors.stone, overflow: 'hidden' }}>
     <Pressable accessibilityRole="button" accessibilityState={{ expanded: open }} onPress={() => setOpen(!open)}
       style={{ minHeight: 58, flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 12 }}>
       <Text style={{ flex: 1, fontFamily: fonts.semibold, fontSize: 15, lineHeight: 21, color: colors.ink }}>{q}</Text>
@@ -103,7 +103,7 @@ function FaqItem({ q, a }: { q: string; a: string }) {
 export function Faq({ title = true }: { title?: boolean }) {
   return <View style={{ gap: 6 }}>
     {title ? <Text accessibilityRole="header" style={{ fontFamily: fonts.bold, fontSize: 22, color: colors.ink, letterSpacing: -0.4, paddingHorizontal: 16 }}>Questions and answers</Text> : null}
-    <Animated.View layout={LinearTransition.springify().damping(settle.damping)} style={{ paddingHorizontal: 16, borderTopWidth: 1, borderColor: colors.stone, marginTop: 6 }}>
+    <Animated.View layout={LinearTransition.duration(280).easing(ease)} style={{ paddingHorizontal: 16, borderTopWidth: 1, borderColor: colors.stone, marginTop: 6 }}>
       {faqs.map((item) => <FaqItem key={item.q} q={item.q} a={item.a} />)}
     </Animated.View>
   </View>;

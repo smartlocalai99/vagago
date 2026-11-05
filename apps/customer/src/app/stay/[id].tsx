@@ -93,11 +93,12 @@ function StayDetailContent({ stay, initialPhoto }: { stay: Stay; initialPhoto: n
     router.push('/review');
   };
 
-  return <View style={{ flex: 1, backgroundColor: colors.white }}>
+  // The page slides in from the right as it fades in over Explore, like the reference.
+  return <Reveal from="right" duration={420} style={{ flex: 1, backgroundColor: colors.white }}>
     <StatusBar style={solidHeader ? 'dark' : 'light'} />
     <ScrollView style={{ flex: 1 }} contentInsetAdjustmentBehavior="never" contentContainerStyle={{ paddingBottom: 28 }} scrollEventThrottle={16}
       onScroll={(event) => { const solid = event.nativeEvent.contentOffset.y > solidAfter; if (solid !== solidHeader) setSolidHeader(solid); }}>
-      <StayGallery stay={stay} topInset={insets.top} initialIndex={initialPhoto} />
+      <Reveal from="grow" duration={560} delay={60}><StayGallery stay={stay} topInset={insets.top} initialIndex={initialPhoto} /></Reveal>
       <View style={{ paddingHorizontal: 18, paddingTop: 18, gap: 24 }}>
         <Reveal style={{ gap: 10 }}>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
@@ -178,10 +179,10 @@ function StayDetailContent({ stay, initialPhoto }: { stay: Stay; initialPhoto: n
           <DealPrice rate={selected.nightlyRate} compareAtRate={selected.compareAtRate} size={24} showDiscount={false} />
           <AppText style={{ fontSize: 13, lineHeight: 18, color: colors.pine, fontFamily: fonts.medium }}>+ taxes & fees</AppText>
         </View>
-        <Button label="Book now & pay at stay" onPress={bookStay} disabled={Boolean(error)} icon={null} style={{ minHeight: 52, borderRadius: 12, paddingHorizontal: 18 }} />
+        <Button label="Book now" onPress={bookStay} disabled={Boolean(error)} icon={null} style={{ minHeight: 52, borderRadius: 12, paddingHorizontal: 18 }} />
       </View>
     </View>
-  </View>;
+  </Reveal>;
 }
 
 export default function StayDetails() {

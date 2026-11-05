@@ -7,5 +7,5 @@ export const faqs = [
   { q: 'Where do I find my booking later?', a: 'Your bookings are saved on this phone under Bookings, with the address and directions. Keep your booking reference handy at check-in.' },
   { q: 'Can I book for a family or a group?', a: 'Yes. Each stay shows how many guests it fits, and the whole property is yours. Set the number of guests before you book.' },
   { q: 'What are the check-in and check-out times?', a: 'Most stays check in from 2 pm and check out by 11 am. The property confirms the times when you arrive.' },
-  { q: 'Where can I find the best prices?', a: 'Every stay shows its current price and any discount. Use Sort on Explore to list stays from the lowest price.' },
+  { q: 'Where can I find the best prices?', a: 'Best deals in Vagamon on Explore shows the largest discounts, and Sort lists stays from the lowest price.' },
 ];

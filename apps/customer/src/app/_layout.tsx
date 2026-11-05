@@ -13,7 +13,6 @@ import { CatalogProvider, useCatalog } from '@/state/catalog-context';
 import { LaunchContext } from '@/state/launch-context';
 import { brandGreen, LaunchScreen } from '@/components/launch-screen';
 import { Icon } from '@/components/icon';
-import { ExpandProvider } from '@/components/expand-transition';
 import { colors, fonts } from '@/theme';
 
 if (process.env.EXPO_OS !== 'web') void SplashScreen.preventAutoHideAsync().catch(() => undefined);
@@ -36,12 +35,12 @@ function AppStack({ fontsReady }: { fontsReady: boolean }) {
 }
 
 function AppScreens({ promptSeen, storageError, dismissStorageError }: { promptSeen: boolean; storageError: string | null; dismissStorageError: () => void }) {
-  return <ExpandProvider><View style={{ flex: 1, backgroundColor: colors.white }}>
+  return <View style={{ flex: 1, backgroundColor: colors.white }}>
     {storageError ? <Pressable accessibilityRole="button" accessibilityLabel="Dismiss storage warning" onPress={dismissStorageError} style={{ padding: 16, paddingTop: 48, backgroundColor: colors.softError }}><Text accessibilityRole="alert" style={{ fontFamily: fonts.medium, color: colors.error }}>{storageError} Tap to dismiss.</Text></Pressable> : null}
     <Stack screenOptions={{ headerStyle: { backgroundColor: colors.white }, headerTintColor: colors.ink, headerTitleStyle: { fontFamily: fonts.semibold, fontSize: 16 }, headerShadowVisible: false, contentStyle: { backgroundColor: colors.white }, headerBackButtonDisplayMode: 'minimal' }}>
       <Stack.Protected guard={promptSeen}>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="stay/[id]" options={{ headerShown: false, animation: 'fade', animationDuration: 280 }} />
+        <Stack.Screen name="stay/[id]" options={{ headerShown: false, animation: 'fade', animationDuration: 340 }} />
         <Stack.Screen name="search" options={{ title: 'Search stays', presentation: 'modal', headerLeft: () => <Pressable accessibilityRole="button" accessibilityLabel="Close search" onPress={() => router.canGoBack() ? router.back() : router.replace('/')} style={{ minWidth: 44, minHeight: 44, justifyContent: 'center' }}><Icon name="close" size={22} /></Pressable> }} />
         <Stack.Screen name="plan" options={{ headerShown: false }} />
         <Stack.Screen name="review" options={{ title: 'Confirm your stay' }} />
@@ -51,7 +50,7 @@ function AppScreens({ promptSeen, storageError, dismissStorageError }: { promptS
       </Stack.Protected>
       <Stack.Screen name="location" options={{ title: 'Your location', headerBackVisible: promptSeen, gestureEnabled: promptSeen }} />
     </Stack>
-  </View></ExpandProvider>;
+  </View>;
 }
 
 export default function RootLayout() {
