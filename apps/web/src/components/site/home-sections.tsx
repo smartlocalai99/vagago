@@ -87,7 +87,7 @@ const promises: { icon: IconName; label: string }[] = [
 
 export function WhyVagaGo({ amenities }: { amenities: AmenityHighlight[] }) {
   return <section className="mx-auto mt-16 max-w-[1200px] px-4 sm:px-6">
-    <h2 className="font-display text-[40px] leading-tight font-semibold md:text-[52px]">Why book with <span className="text-action">VagaGo</span></h2>
+    <h2 className="font-display text-[40px] leading-tight font-semibold md:text-[52px]">Why book with <span className="text-forest">VagaGo</span></h2>
     <ul className="mt-5 flex flex-wrap gap-x-10 gap-y-4">
       {promises.map((item) => <li key={item.label} className="flex items-center gap-3 text-[17px] font-bold">
         <span className="grid size-12 place-items-center rounded-full bg-action-soft text-action"><Icon name={item.icon} size={22} /></span>{item.label}
@@ -102,13 +102,11 @@ export function WhyVagaGo({ amenities }: { amenities: AmenityHighlight[] }) {
             <div className="absolute inset-0 bg-[linear-gradient(to_top,rgba(0,0,0,0.72),rgba(0,0,0,0.05)_55%)]" />
             <div className="absolute inset-x-4 bottom-4 text-white">
               <p className="text-[19px] leading-6 font-bold">{item.name}</p>
-              <p className="text-[13px] text-white/80">At {item.stays} {item.stays === 1 ? 'stay' : 'stays'}</p>
             </div>
           </li>
           : <li key={item.name} className="flex aspect-square w-[62%] shrink-0 snap-start flex-col items-center justify-center rounded-[28px] bg-tile p-4 text-center sm:w-auto">
             <img src={item.art.src} alt="" className="w-[78%]" loading="lazy" />
             <p className="mt-3 text-[18px] leading-6 font-bold">{item.name}</p>
-            <p className="text-[13px] text-muted">At {item.stays} {item.stays === 1 ? 'stay' : 'stays'}</p>
           </li>)}
       </ul>
     </> : null}
