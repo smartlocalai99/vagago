@@ -10,6 +10,7 @@ import { EscapeProvider, useEscape } from '@/state/escape-context';
 import { LocationProvider, useLocationContext } from '@/state/location-context';
 import { BookingsProvider, useBookings } from '@/state/bookings-context';
 import { CatalogProvider, useCatalog } from '@/state/catalog-context';
+import { LaunchContext } from '@/state/launch-context';
 import { brandGreen, LaunchScreen } from '@/components/launch-screen';
 import { Icon } from '@/components/icon';
 import { colors, fonts } from '@/theme';
@@ -28,7 +29,7 @@ function AppStack({ fontsReady }: { fontsReady: boolean }) {
   // animation fades straight into the first screen.
   return <View style={{ flex: 1, backgroundColor: launched ? colors.white : brandGreen }}>
     <StatusBar style={launched ? 'dark' : 'light'} />
-    {allReady ? <AppScreens promptSeen={promptSeen} storageError={storageError} dismissStorageError={dismissStorageError} /> : null}
+    {allReady ? <LaunchContext value={launched}><AppScreens promptSeen={promptSeen} storageError={storageError} dismissStorageError={dismissStorageError} /></LaunchContext> : null}
     {!launched ? <LaunchScreen ready={allReady} onComplete={finishLaunch} /> : null}
   </View>;
 }
@@ -45,6 +46,7 @@ function AppScreens({ promptSeen, storageError, dismissStorageError }: { promptS
         <Stack.Screen name="review" options={{ title: 'Confirm your stay' }} />
         <Stack.Screen name="payment" options={{ title: 'Payment' }} />
         <Stack.Screen name="booking/[id]" options={{ title: 'Your booking' }} />
+        <Stack.Screen name="faq" options={{ title: 'Questions and answers' }} />
       </Stack.Protected>
       <Stack.Screen name="location" options={{ title: 'Your location', headerBackVisible: promptSeen, gestureEnabled: promptSeen }} />
     </Stack>

@@ -4,16 +4,16 @@ import type { Coordinates } from '@/types';
 
 export type Attraction = { id: string; name: string; kind: string; coordinates: Coordinates };
 
-// Approximate public landmark positions around Vagamon.
+// Approximate public landmark positions around Vagamon (ids match the database slugs).
 export const attractions: Attraction[] = [
-  { id: 'meadows', name: 'Vagamon Meadows', kind: 'Rolling grass hills', coordinates: { latitude: 9.6835, longitude: 76.9091 } },
-  { id: 'pine-forest', name: 'Vagamon Pine Forest', kind: 'Forest walk', coordinates: { latitude: 9.6731, longitude: 76.9046 } },
-  { id: 'lake', name: 'Vagamon Lake', kind: 'Lake and boating', coordinates: { latitude: 9.6905, longitude: 76.9195 } },
+  { id: 'vagamon-meadows', name: 'Vagamon Meadows', kind: 'Rolling grass hills', coordinates: { latitude: 9.6835, longitude: 76.9091 } },
+  { id: 'vagamon-pine-forest', name: 'Vagamon Pine Forest', kind: 'Forest walk', coordinates: { latitude: 9.6731, longitude: 76.9046 } },
+  { id: 'vagamon-lake', name: 'Vagamon Lake', kind: 'Lake and boating', coordinates: { latitude: 9.6905, longitude: 76.9195 } },
   { id: 'murugan-mala', name: 'Murugan Mala', kind: 'Rock-cut temple hill', coordinates: { latitude: 9.6966, longitude: 76.9097 } },
   { id: 'kurisumala', name: 'Kurisumala', kind: 'Pilgrim hilltop', coordinates: { latitude: 9.7057, longitude: 76.8897 } },
   { id: 'thangalpara', name: 'Thangalpara', kind: 'Rock viewpoint', coordinates: { latitude: 9.7139, longitude: 76.9207 } },
-  { id: 'paragliding', name: 'Paragliding point', kind: 'Adventure sports', coordinates: { latitude: 9.6818, longitude: 76.9131 } },
-  { id: 'marmala', name: 'Marmala Waterfalls', kind: 'Waterfall', coordinates: { latitude: 9.7143, longitude: 76.8306 } },
+  { id: 'paragliding-point', name: 'Paragliding point', kind: 'Adventure sports', coordinates: { latitude: 9.6818, longitude: 76.9131 } },
+  { id: 'marmala-waterfalls', name: 'Marmala Waterfalls', kind: 'Waterfall', coordinates: { latitude: 9.7143, longitude: 76.8306 } },
   { id: 'illikkal-kallu', name: 'Illikkal Kallu', kind: 'Trek and viewpoint', coordinates: { latitude: 9.7838, longitude: 76.8256 } },
   { id: 'ilaveezhapoonchira', name: 'Ilaveezhapoonchira', kind: 'Hill valley viewpoint', coordinates: { latitude: 9.8016, longitude: 76.8150 } },
 ];

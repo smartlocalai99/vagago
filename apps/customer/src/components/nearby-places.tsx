@@ -1,7 +1,9 @@
 import { Pressable, Text, View } from 'react-native';
+import { Image } from 'expo-image';
 import { Icon } from '@/components/icon';
 import { openDirections } from '@/components/directions';
 import { formatDrive, formatKm, nearbyAttractions, useAttractions } from '@/data/attractions';
+import { placePhotoUrl } from '@/lib/site';
 import { colors, fonts } from '@/theme';
 import type { Stay } from '@/types';
 
@@ -13,7 +15,8 @@ export function NearbyPlaces({ stay, directions = false }: { stay: Stay; directi
     <View style={{ marginTop: 6 }}>
       {places.map((place, index) => {
         const row = <>
-          <Icon name="pin" size={18} color={colors.fern} />
+          {placePhotoUrl(place.id) ? <Image source={{ uri: placePhotoUrl(place.id)! }} contentFit="cover" cachePolicy="memory-disk" transition={150} accessible={false} style={{ width: 48, height: 48, borderRadius: 12, backgroundColor: colors.stone }} />
+            : <View style={{ width: 48, height: 48, borderRadius: 12, backgroundColor: colors.meadow, alignItems: 'center', justifyContent: 'center' }}><Icon name="pin" size={18} /></View>}
           <View style={{ flex: 1, gap: 1 }}>
             <Text style={{ fontFamily: fonts.semibold, fontSize: 14, color: colors.ink }}>{place.name}</Text>
             <Text style={{ fontFamily: fonts.regular, fontSize: 11, color: colors.fern }}>{place.kind}</Text>
@@ -24,7 +27,7 @@ export function NearbyPlaces({ stay, directions = false }: { stay: Stay; directi
           </View>
           {directions ? <Icon name="chevron" size={15} color={colors.fern} /> : null}
         </>;
-        const style = { flexDirection: 'row' as const, alignItems: 'center' as const, gap: 12, paddingVertical: 11, borderTopWidth: index ? 1 : 0, borderColor: colors.stone };
+        const style = { flexDirection: 'row' as const, alignItems: 'center' as const, gap: 12, paddingVertical: 9, borderTopWidth: index ? 1 : 0, borderColor: colors.stone };
         return directions
           ? <Pressable key={place.id} accessibilityRole="button" accessibilityLabel={`Directions to ${place.name}, about ${formatKm(place.roadKm)}`} onPress={() => openDirections(place.coordinates, stay.coordinates)} style={({ pressed }) => [style, { opacity: pressed ? 0.6 : 1 }]}>{row}</Pressable>
           : <View key={place.id} style={style}>{row}</View>;

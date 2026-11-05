@@ -9,6 +9,8 @@ import { parseDateOnly, validateGetawayDraft } from '@vagago/domain';
 import { AppText, Button, Chip, EmptyState, Heading, Page, stayStyleLabel } from '@/components/ui';
 import { Icon } from '@/components/icon';
 import { StayGallery } from '@/components/stay-gallery';
+import { Highlights } from '@/components/highlights';
+import { Reveal } from '@/components/motion';
 import { HiddenLocation } from '@/components/hidden-location';
 import { NearbyPlaces } from '@/components/nearby-places';
 import { openArea } from '@/components/directions';
@@ -97,7 +99,7 @@ function StayDetailContent({ stay }: { stay: Stay }) {
       onScroll={(event) => { const solid = event.nativeEvent.contentOffset.y > solidAfter; if (solid !== solidHeader) setSolidHeader(solid); }}>
       <StayGallery stay={stay} topInset={insets.top} />
       <View style={{ paddingHorizontal: 18, paddingTop: 18, gap: 24 }}>
-        <View style={{ gap: 10 }}>
+        <Reveal style={{ gap: 10 }}>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
             <Chip icon="home" label={`Entire ${stayStyleLabel(stay).toLowerCase()}`} />
             <Chip icon="cash" label="Pay at stay" tone="save" />
@@ -110,17 +112,19 @@ function StayDetailContent({ stay }: { stay: Stay }) {
               <AppText style={{ fontFamily: fonts.semibold, fontSize: 15, color: colors.pine }}>View area on map</AppText>
             </Pressable>
           </View>
-        </View>
+        </Reveal>
 
-        <View style={{ backgroundColor: colors.brand, borderRadius: 16, borderCurve: 'continuous', padding: 18, flexDirection: 'row', alignItems: 'center', gap: 14 }}>
+        <Reveal delay={80}><View style={{ backgroundColor: colors.brand, borderRadius: 16, borderCurve: 'continuous', padding: 18, flexDirection: 'row', alignItems: 'center', gap: 14 }}>
           <View style={{ flex: 1, gap: 6 }}>
             <Text style={{ fontFamily: fonts.bold, fontSize: 19, lineHeight: 25, color: colors.white }}>Book now, pay at the stay</Text>
             <Text style={{ fontFamily: fonts.regular, fontSize: 13, lineHeight: 19, color: 'rgba(255,255,255,0.8)' }}>No advance payment. The exact address and directions unlock as soon as you book.</Text>
           </View>
           <Image source={brandMark} accessible={false} contentFit="contain" style={{ width: 62, height: 47 }} />
-        </View>
+        </View></Reveal>
 
-        <Pressable accessibilityRole="button" accessibilityLabel="Edit dates and guests" onPress={editSearch}
+        <Reveal delay={160}><Highlights stay={stay} /></Reveal>
+
+        <Reveal delay={240}><Pressable accessibilityRole="button" accessibilityLabel="Edit dates and guests" onPress={editSearch}
           style={({ pressed }) => ({ flexDirection: 'row', alignItems: 'center', gap: 12, padding: 15, borderWidth: 1, borderColor: colors.stone, borderRadius: 12, opacity: pressed ? 0.7 : 1 })}>
           <Icon name="calendar" size={22} />
           <View style={{ flex: 1, gap: 2 }}>
@@ -128,7 +132,7 @@ function StayDetailContent({ stay }: { stay: Stay }) {
             <AppText style={{ color: colors.fern, fontSize: 12 }}>{draft.guests} {draft.guests === 1 ? 'guest' : 'guests'}{validation.nights ? ` · ${validation.nights} ${validation.nights === 1 ? 'night' : 'nights'}` : ''}</AppText>
           </View>
           <AppText style={{ fontFamily: fonts.semibold, fontSize: 12, textDecorationLine: 'underline' }}>Edit</AppText>
-        </Pressable>
+        </Pressable></Reveal>
 
         {stay.description ? <View style={{ gap: 8 }}>
           <Heading size={19}>About this stay</Heading>

@@ -122,12 +122,9 @@ function Gallery({ stay, compact = false, topInset = 0, onOpen }: GalleryProps) 
       </ScrollView> : null}
     </> : null}
 
-    {compact && hasSlides ? <View style={{ position: 'absolute', bottom: 0, alignSelf: 'center', flexDirection: 'row' }}>
-      {photos.map((_, index) => <Pressable key={index} accessibilityRole="button" accessibilityLabel={`${stay.name}: photo ${index + 1}`}
-        accessibilityState={{ selected: selected === index }} onPress={() => selectPhoto(index)}
-        style={{ width: 28, height: 36, alignItems: 'center', justifyContent: 'center' }}>
-        <View style={{ width: selected === index ? 8 : 6, height: selected === index ? 8 : 6, borderRadius: 4, backgroundColor: selected === index ? colors.white : 'rgba(255,255,255,0.6)', boxShadow: '0 1px 4px rgba(0,0,0,0.25)' }} />
-      </Pressable>)}
+    {compact && hasSlides ? <View pointerEvents="none" accessibilityElementsHidden importantForAccessibility="no-hide-descendants" style={{ position: 'absolute', bottom: 12, alignSelf: 'center', flexDirection: 'row', gap: 6 }}>
+      {/* Position only: the whole card is one button, so photos change by swiping. */}
+      {photos.map((_, index) => <View key={index} style={{ width: selected === index ? 8 : 6, height: selected === index ? 8 : 6, borderRadius: 4, alignSelf: 'center', backgroundColor: selected === index ? colors.white : 'rgba(255,255,255,0.6)', boxShadow: '0 1px 4px rgba(0,0,0,0.25)' }} />)}
     </View> : null}
   </View>;
 }
