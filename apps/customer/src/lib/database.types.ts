@@ -600,6 +600,7 @@ export type Database = {
       }
       reservations: {
         Row: {
+          booking_fee_paise: number
           cancellation_reason: string | null
           cancelled_at: string | null
           cancelled_by: string | null
@@ -630,6 +631,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          booking_fee_paise?: number
           cancellation_reason?: string | null
           cancelled_at?: string | null
           cancelled_by?: string | null
@@ -660,6 +662,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          booking_fee_paise?: number
           cancellation_reason?: string | null
           cancelled_at?: string | null
           cancelled_by?: string | null
@@ -882,6 +885,7 @@ export type Database = {
       cancel_reservation: {
         Args: { p_reason?: string; p_reservation_id: string }
         Returns: {
+          booking_fee_paise: number
           cancellation_reason: string | null
           cancelled_at: string | null
           cancelled_by: string | null
@@ -931,6 +935,7 @@ export type Database = {
           p_special_requests?: string
         }
         Returns: {
+          booking_fee_paise: number
           cancellation_reason: string | null
           cancelled_at: string | null
           cancelled_by: string | null
@@ -995,6 +1000,7 @@ export type Database = {
           p_status: Database["public"]["Enums"]["reservation_status"]
         }
         Returns: {
+          booking_fee_paise: number
           cancellation_reason: string | null
           cancelled_at: string | null
           cancelled_by: string | null

@@ -15,7 +15,9 @@ type AccountState = {
   saved: Account | null;
   canLock: boolean;
   signUp: (details: { name: string; mobile: string; lock: boolean }) => Promise<string | null>;
-  logInWithLock: () => Promise<string | null>;
+  // True when this mobile number is the account saved on this phone.
+  isSavedNumber: (mobile: string) => boolean;
+  logInSaved: () => Promise<string | null>;
   setLock: (lock: boolean) => Promise<void>;
   forgetSaved: () => Promise<void>;
   logout: () => Promise<void>;
@@ -84,9 +86,12 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     return null;
   }, [signIn]);
 
-  const logInWithLock = useCallback(async () => {
+  const isSavedNumber = useCallback((mobile: string) => Boolean(stored && stored.mobile === mobile.replace(/[\s-]/g, '')), [stored]);
+
+  // Returning guest: Face ID, fingerprint or the screen lock confirms it is them.
+  const logInSaved = useCallback(async () => {
     if (!stored) return 'No saved account on this phone.';
-    if (!await verifyOwner(`Log in as ${stored.name}`)) return 'Face ID or screen lock was not confirmed.';
+    if (stored.lock && !await verifyOwner(`Log in as ${stored.name}`)) return 'Face ID or screen lock was not confirmed.';
     await signIn({ ...stored, signedIn: true });
     return null;
   }, [signIn, stored]);
@@ -104,18 +109,15 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     setStored(null);
   }, []);
 
-  // With a lock the details stay saved for a one-tap Face ID login; without one they are removed.
-  // The phone's guest session is kept, so bookings made here come back after logging in again.
+  // The account stays saved on this phone, so entering the same number logs straight back in.
+  // The phone's guest session is kept, so bookings made here come back too.
   const logout = useCallback(async () => {
-    if (stored?.lock) {
-      const next = { ...stored, signedIn: false };
-      await persist(next);
-      setStored(next);
-    } else {
-      await forgetSaved();
-    }
+    if (!stored) return;
+    const next = { ...stored, signedIn: false };
+    await persist(next);
+    setStored(next);
     updateBookingGuest({ fullName: '', mobile: '' });
-  }, [forgetSaved, stored, updateBookingGuest]);
+  }, [stored, updateBookingGuest]);
 
   const deleteAccount = useCallback(async () => {
     const { data } = await supabase.auth.getSession();
@@ -131,8 +133,8 @@ export function AccountProvider({ children }: { children: ReactNode }) {
 
   const account = stored?.signedIn ? stored : null;
   const saved = stored && !stored.signedIn ? stored : null;
-  const value = useMemo(() => ({ ready, account, saved, canLock, signUp, logInWithLock, setLock, forgetSaved, logout, deleteAccount }),
-    [ready, account, saved, canLock, signUp, logInWithLock, setLock, forgetSaved, logout, deleteAccount]);
+  const value = useMemo(() => ({ ready, account, saved, canLock, signUp, isSavedNumber, logInSaved, setLock, forgetSaved, logout, deleteAccount }),
+    [ready, account, saved, canLock, signUp, isSavedNumber, logInSaved, setLock, forgetSaved, logout, deleteAccount]);
   return <AccountContext value={value}>{children}</AccountContext>;
 }
 

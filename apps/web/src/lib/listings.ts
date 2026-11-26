@@ -123,3 +123,6 @@ export async function fetchPublishedReviews(limit = 8): Promise<GuestReview[]> {
     .map((row) => ({ id: row.id, comment: row.comment, author: row.author_name ?? 'VagaGo guest', stay: row.properties?.name ?? null,
       accommodation: row.accommodation_rating, connectivity: row.connectivity_rating, cleanliness: row.cleanliness_rating, rating: row.rating }));
 }
+
+// Flat fee the database adds to every booking (create_reservation), in paise.
+export const bookingFeePaise = 10000;

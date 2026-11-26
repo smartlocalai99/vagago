@@ -20,6 +20,7 @@ import { money } from '@/data/stays';
 import { useCatalog } from '@/state/catalog-context';
 import { getRoomOptions, type RoomOption } from '@/data/room-options';
 import { useEscape } from '@/state/escape-context';
+import { useAccount } from '@/state/account-context';
 import { colors, fonts } from '@/theme';
 import type { Stay } from '@/types';
 
@@ -70,6 +71,7 @@ function RoundButton({ icon, label, onPress }: { icon: 'back' | 'share'; label: 
 
 function StayDetailContent({ stay, initialPhoto }: { stay: Stay; initialPhoto: number }) {
   const { draft, updateDraft } = useEscape();
+  const { account } = useAccount();
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
   // Once the photo has scrolled away, a solid bar with the name replaces the floating buttons' backdrop.
@@ -90,7 +92,8 @@ function StayDetailContent({ stay, initialPhoto }: { stay: Stay; initialPhoto: n
   const bookStay = () => {
     if (error) return;
     updateDraft({ stayId: stay.id, roomOptionId: selected.id, roomCount: 1 });
-    router.push('/review');
+    // Bookings belong to an account: log in or sign up first, then continue straight to review.
+    router.push(account ? '/review' : '/login?next=review');
   };
 
   // The page slides in from the right as it fades in over Explore, like the reference.

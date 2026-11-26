@@ -6,8 +6,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AppText, EmptyState, Heading, Page } from '@/components/ui';
 import { formatDate } from '@/components/escape-summary';
 import { ExactLocation } from '@/components/exact-location';
-import { Icon } from '@/components/icon';
 import { NearbyPlaces } from '@/components/nearby-places';
+import { BookingConfirmed } from '@/components/booking-moments';
 import { ReviewForm } from '@/components/review-form';
 import { money } from '@/data/stays';
 import { useBookings, type ExactAddress } from '@/state/bookings-context';
@@ -62,10 +62,7 @@ export default function BookingDetails() {
 
   return <ScrollView style={{ flex: 1, backgroundColor: colors.white }} contentInsetAdjustmentBehavior="automatic" contentContainerStyle={{ paddingBottom: 32 + insets.bottom }}>
     <Stack.Screen options={{ title: 'Your booking' }} />
-    {confirmed && booking.status === 'confirmed' ? <View style={{ backgroundColor: colors.meadow, paddingHorizontal: 20, paddingVertical: 16, flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-      <View style={{ width: 34, height: 34, borderRadius: 17, backgroundColor: colors.pine, alignItems: 'center', justifyContent: 'center' }}><Icon name="check" size={19} color={colors.white} /></View>
-      <View style={{ flex: 1, gap: 1 }}><Heading size={17}>Booking confirmed</Heading><AppText style={{ fontSize: 12, color: colors.fern }}>Your exact address and directions are below.</AppText></View>
-    </View> : null}
+    {confirmed && booking.status === 'confirmed' ? <BookingConfirmed reference={booking.reference} /> : null}
     {!active && !confirmed ? <View style={{ backgroundColor: booking.status === 'completed' ? colors.canvas : colors.softError, paddingHorizontal: 20, paddingVertical: 14 }}>
       <AppText style={{ color: booking.status === 'completed' ? colors.ink : colors.error, fontFamily: fonts.semibold, fontSize: 13 }}>{statusLabels[booking.status]}</AppText>
     </View> : null}
@@ -81,7 +78,11 @@ export default function BookingDetails() {
         <Row label="Guests" value={`${booking.guests} ${booking.guests === 1 ? 'guest' : 'guests'} · ${booking.nights} ${booking.nights === 1 ? 'night' : 'nights'}`} />
         {room ? <Row label="Stay" value={room.name} /> : null}
         <Row label="Booked by" value={booking.guest.fullName} />
-        {booking.discount > 0 ? <Row label="Offer" value={`${booking.offerCode ?? 'Offer'} · you saved ${money(booking.discount)}`} /> : null}
+        <View style={{ gap: 9, borderTopWidth: 1, borderColor: colors.stone, paddingTop: 12 }}>
+          <Row label="Stay" value={money(booking.total + booking.discount - booking.fee)} />
+          {booking.discount > 0 ? <Row label={`Offer ${booking.offerCode ?? ''}`.trim()} value={`− ${money(booking.discount)}`} /> : null}
+          {booking.fee > 0 ? <Row label="Booking fee (flat)" value={money(booking.fee)} /> : null}
+        </View>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 12, borderTopWidth: 1, borderColor: colors.stone, paddingTop: 12 }}>
           <AppText style={{ fontSize: 13, fontFamily: fonts.bold }}>Pay at check-in</AppText>
           <AppText selectable style={{ fontSize: 17, fontFamily: fonts.bold }}>{money(booking.total)}</AppText>

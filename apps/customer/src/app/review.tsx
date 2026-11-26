@@ -9,7 +9,7 @@ import { formatDate } from '@/components/escape-summary';
 import { Icon } from '@/components/icon';
 import { useEscape, validateBookingGuest } from '@/state/escape-context';
 import { useBookings } from '@/state/bookings-context';
-import { availableOffers } from '@/data/offers';
+import { availableOffers, bookingFee } from '@/data/offers';
 import { money } from '@/data/stays';
 import { useStays } from '@/state/catalog-context';
 import { getRoomOptions } from '@/data/room-options';
@@ -73,13 +73,14 @@ export default function Review() {
       <View style={{ gap: 14, paddingTop: 22, borderTopWidth: 1, borderColor: colors.stone }}>
         <Heading size={18}>Price details</Heading>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 12 }}><AppText style={{ fontSize: 13 }}>{money(room.nightlyRate)} × {estimate.nights} {estimate.nights === 1 ? 'night' : 'nights'}</AppText><AppText selectable style={{ fontSize: 13 }}>{money(estimate.subtotal)}</AppText></View>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 12 }}><AppText style={{ fontSize: 13 }}>Booking fee <AppText style={{ fontSize: 12, color: colors.save, fontFamily: fonts.semibold }}>flat</AppText></AppText><AppText selectable style={{ fontSize: 13 }}>{money(bookingFee)}</AppText></View>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 12 }}><AppText style={{ fontSize: 12, color: colors.fern }}>Taxes and fees</AppText><AppText style={{ fontSize: 12, color: colors.fern }}>Paid at the property</AppText></View>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, padding: 12, borderRadius: 12, backgroundColor: colors.softSave }}><Icon name="tag" size={16} color={colors.save} /><AppText style={{ flex: 1, fontSize: 12, color: colors.save, fontFamily: fonts.semibold }}>Offers up to {offerPercent}% off are applied at the next step.</AppText></View>
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 12, borderTopWidth: 1, borderColor: colors.stone, paddingTop: 14 }}><AppText style={{ fontFamily: fonts.bold, fontSize: 13, flex: 1 }}>Estimated subtotal</AppText><AppText selectable style={{ fontFamily: fonts.bold, fontSize: 18 }}>{money(estimate.subtotal)}</AppText></View>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 12, borderTopWidth: 1, borderColor: colors.stone, paddingTop: 14 }}><AppText style={{ fontFamily: fonts.bold, fontSize: 13, flex: 1 }}>Estimated total</AppText><AppText selectable style={{ fontFamily: fonts.bold, fontSize: 18 }}>{money(estimate.subtotal + bookingFee)}</AppText></View>
       </View>
     </ScrollView>
     <View style={{ paddingHorizontal: 20, paddingTop: 13, paddingBottom: Math.max(insets.bottom, 16), borderTopWidth: 1, borderColor: colors.stone, gap: 10 }}>
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline', gap: 12 }}><AppText style={{ fontSize: 12, color: colors.fern }}>Subtotal before taxes</AppText><AppText selectable style={{ fontFamily: fonts.bold, fontSize: 20 }}>{money(estimate.subtotal)}</AppText></View>
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline', gap: 12 }}><AppText style={{ fontSize: 12, color: colors.fern }}>Total before offers and taxes</AppText><AppText selectable style={{ fontFamily: fonts.bold, fontSize: 20 }}>{money(estimate.subtotal + bookingFee)}</AppText></View>
       <Button label="Continue to payment" icon="arrow" onPress={continueToPayment} />
     </View>
   </KeyboardAvoidingView>;

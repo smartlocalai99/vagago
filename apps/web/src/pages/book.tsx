@@ -5,7 +5,7 @@ import { Icon } from '@/components/icons';
 import { SiteLayout } from '@/components/site/layout';
 import { fullDate, money } from '@/lib/format';
 import { bookingError, ensureGuest, guest } from '@/lib/guest';
-import { listingColumns, toListing, type Listing } from '@/lib/listings';
+import { bookingFeePaise, listingColumns, toListing, type Listing } from '@/lib/listings';
 import { nightsBetween, readTrip, tripParams, tripProblem } from '@/lib/trip';
 
 type Form = { name: string; phone: string; email: string; requests: string };
@@ -118,7 +118,8 @@ export default function Book() {
             </dl>
             {nights > 0 ? <dl className="space-y-2 border-t border-line pt-4 text-[15px]">
               <div className="flex justify-between"><dt className="text-muted">{money(room.rate)} × {nights} {nights === 1 ? 'night' : 'nights'}</dt><dd className="tabular-nums">{money(room.rate * nights)}</dd></div>
-              <div className="flex justify-between text-[17px] font-bold"><dt>Pay at the stay</dt><dd className="tabular-nums">{money(room.rate * nights)}</dd></div>
+              <div className="flex justify-between"><dt className="text-muted">Booking fee <span className="font-semibold text-save">flat</span></dt><dd className="tabular-nums">{money(bookingFeePaise)}</dd></div>
+              <div className="flex justify-between text-[17px] font-bold"><dt>Total</dt><dd className="tabular-nums">{money(room.rate * nights + bookingFeePaise)}</dd></div>
               <p className="text-[13px] text-muted">Plus taxes and fees charged by the property.</p>
             </dl> : null}
           </div>

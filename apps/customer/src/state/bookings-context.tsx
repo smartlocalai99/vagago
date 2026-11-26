@@ -15,6 +15,7 @@ export type Booking = {
   nights: number;
   total: number;
   discount: number;
+  fee: number;
   offerCode: string | null;
   guest: BookingGuest;
   status: BookingStatus;
@@ -49,15 +50,15 @@ type BookingsState = {
 };
 
 const BookingsContext = createContext<BookingsState | null>(null);
-const cacheKey = '@vagago/reservations:v2';
+const cacheKey = '@vagago/reservations:v3';
 const addressKey = '@vagago/addresses:v1';
 // Bookings only change when the guest or the property acts, so refetch at most once a minute.
 const minRefreshMs = 60 * 1000;
-const columns = 'id, reference, property_id, room_type_id, check_in, check_out, guests, nights, total_paise, discount_paise, offer_code, guest_name, guest_phone, guest_email, status, created_at';
+const columns = 'id, reference, property_id, room_type_id, check_in, check_out, guests, nights, total_paise, discount_paise, booking_fee_paise, offer_code, guest_name, guest_phone, guest_email, status, created_at';
 
 type ReservationRow = {
   id: string; reference: string; property_id: string; room_type_id: string; check_in: string; check_out: string;
-  guests: number; nights: number | null; total_paise: number; discount_paise: number | null; offer_code: string | null; guest_name: string; guest_phone: string; guest_email: string | null;
+  guests: number; nights: number | null; total_paise: number; discount_paise: number | null; booking_fee_paise: number | null; offer_code: string | null; guest_name: string; guest_phone: string; guest_email: string | null;
   status: BookingStatus; created_at: string;
 };
 
@@ -65,7 +66,7 @@ function toBooking(row: ReservationRow): Booking {
   return {
     id: row.id, reference: row.reference, stayId: row.property_id, roomOptionId: row.room_type_id,
     checkIn: row.check_in, checkOut: row.check_out, guests: row.guests, nights: row.nights ?? 0, total: row.total_paise / 100,
-    discount: (row.discount_paise ?? 0) / 100, offerCode: row.offer_code ?? null,
+    discount: (row.discount_paise ?? 0) / 100, fee: (row.booking_fee_paise ?? 0) / 100, offerCode: row.offer_code ?? null,
     guest: { fullName: row.guest_name, mobile: row.guest_phone, email: row.guest_email ?? '' },
     status: row.status, createdAt: row.created_at,
   };

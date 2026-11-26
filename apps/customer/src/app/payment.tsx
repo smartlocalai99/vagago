@@ -8,7 +8,8 @@ import { AppText, Button, EmptyState, Heading, Page } from '@/components/ui';
 import { Icon } from '@/components/icon';
 import { useEscape, validateBookingGuest } from '@/state/escape-context';
 import { useBookings } from '@/state/bookings-context';
-import { availableOffers, discountFor, type Offer } from '@/data/offers';
+import { availableOffers, bookingFee, discountFor, type Offer } from '@/data/offers';
+import { BookingFeeCard } from '@/components/booking-moments';
 import { ease } from '@/components/motion';
 import { getRoomOptions } from '@/data/room-options';
 import { money } from '@/data/stays';
@@ -34,7 +35,7 @@ export default function Payment() {
 
   const offer: Offer | null = offers.find((item) => item.code === offerCode) ?? null;
   const discount = estimate ? discountFor(estimate.subtotal, offer) : 0;
-  const payable = estimate ? estimate.subtotal - discount : 0;
+  const payable = estimate ? estimate.subtotal - discount + bookingFee : 0;
 
   if (!valid || !stay || !room || !estimate) return <Page><Stack.Screen options={{ title: 'Payment' }} /><EmptyState title="Complete your booking details" body="Choose your stay and add the guest details before selecting payment." action="Review booking" onAction={() => router.replace('/review')} icon="user" /></Page>;
 
@@ -85,11 +86,14 @@ export default function Payment() {
           </Pressable>;
         })}
       </View> : null}
+      <BookingFeeCard />
       <View style={{ gap: 13, paddingTop: 22, borderTopWidth: 1, borderColor: colors.stone }}>
         <Heading size={18}>Booking summary</Heading>
         <View style={{ gap: 4 }}><AppText style={{ fontFamily: fonts.semibold }}>{stay.name}</AppText><AppText style={{ fontSize: 12, color: colors.fern }}>{room.name} · {estimate.nights} nights · {draft.guests} {draft.guests === 1 ? 'guest' : 'guests'}</AppText></View>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 12 }}><AppText style={{ fontSize: 13 }}>Accommodation</AppText><AppText selectable style={{ fontSize: 13 }}>{money(estimate.subtotal)}</AppText></View>
         {offer ? <Animated.View key={offer.code} entering={FadeIn.duration(260)} exiting={FadeOut.duration(160)} style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 12 }}><AppText style={{ fontSize: 13, color: colors.save }}>{offer.title}</AppText><AppText selectable style={{ fontSize: 13, color: colors.save, fontFamily: fonts.semibold }}>− {money(discount)}</AppText></Animated.View> : null}
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 12 }}><AppText style={{ fontSize: 13 }}>Booking fee <AppText style={{ fontSize: 12, color: colors.save, fontFamily: fonts.semibold }}>flat</AppText></AppText><AppText selectable style={{ fontSize: 13 }}>{money(bookingFee)}</AppText></View>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 12, borderTopWidth: 1, borderColor: colors.stone, paddingTop: 12 }}><AppText style={{ fontSize: 14, fontFamily: fonts.bold }}>Total</AppText><AppText selectable style={{ fontSize: 15, fontFamily: fonts.bold }}>{money(payable)}</AppText></View>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 12 }}><AppText style={{ fontSize: 12, color: colors.fern }}>Taxes and fees</AppText><AppText style={{ fontSize: 12, color: colors.fern }}>Paid at the property</AppText></View>
         <AppText style={{ fontSize: 11, lineHeight: 18, color: colors.fern }}>Taxes and fees are added by the property at check-in.</AppText>
       </View>
@@ -97,9 +101,9 @@ export default function Payment() {
     </ScrollView>
     <View style={{ paddingHorizontal: 20, paddingTop: 14, paddingBottom: Math.max(insets.bottom, 16), borderTopWidth: 1, borderColor: colors.stone, gap: 10 }}>
       <Animated.View layout={LinearTransition.duration(260).easing(ease)} style={{ flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between', gap: 12 }}>
-        <AppText style={{ fontSize: 12, color: colors.fern }}>{discount ? `You save ${money(discount)}` : 'Subtotal before taxes'}</AppText>
+        <AppText style={{ fontSize: 12, color: colors.fern }}>{discount ? `You save ${money(discount)}` : 'Total before taxes'}</AppText>
         <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 8 }}>
-          {discount ? <AppText style={{ fontSize: 13, color: colors.fern, textDecorationLine: 'line-through' }}>{money(estimate.subtotal)}</AppText> : null}
+          {discount ? <AppText style={{ fontSize: 13, color: colors.fern, textDecorationLine: 'line-through' }}>{money(estimate.subtotal + bookingFee)}</AppText> : null}
           <Animated.Text key={payable} entering={FadeIn.duration(260)} selectable style={{ fontFamily: fonts.bold, fontSize: 20, color: colors.ink }}>{money(payable)}</Animated.Text>
         </View>
       </Animated.View>

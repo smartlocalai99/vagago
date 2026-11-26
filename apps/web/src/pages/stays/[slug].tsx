@@ -9,7 +9,7 @@ import { Chip, DealPrice } from '@/components/site/stay-parts';
 import { money, todayInIndia } from '@/lib/format';
 import { guest } from '@/lib/guest';
 import { placePhoto } from '@/lib/places';
-import { fetchListing, fetchPlaces, fetchSlugs, styleLabel, type Listing, type Photo, type Place, type Room } from '@/lib/listings';
+import { bookingFeePaise, fetchListing, fetchPlaces, fetchSlugs, styleLabel, type Listing, type Photo, type Place, type Room } from '@/lib/listings';
 import { addDays, formatDrive, formatKm, nearby, nightsBetween, readTrip, tripParams, tripProblem, type TripQuery } from '@/lib/trip';
 
 type Props = { stay: Listing; places: Place[] };
@@ -152,7 +152,8 @@ function BookingBox({ stay, room, rooms, onRoom, initial }: { stay: Listing; roo
     </p>
     {!tripProblem(trip) ? <div className="mt-3 space-y-2 border-t border-line pt-4 text-[15px]">
       <div className="flex justify-between"><span className="text-muted">{money(room.rate)} × {nights} {nights === 1 ? 'night' : 'nights'}</span><span className="tabular-nums">{money(room.rate * nights)}</span></div>
-      <div className="flex justify-between font-bold"><span>Estimated total</span><span className="tabular-nums">{money(room.rate * nights)}</span></div>
+      <div className="flex justify-between"><span className="text-muted">Booking fee <span className="font-semibold text-save">flat</span></span><span className="tabular-nums">{money(bookingFeePaise)}</span></div>
+      <div className="flex justify-between font-bold"><span>Estimated total</span><span className="tabular-nums">{money(room.rate * nights + bookingFeePaise)}</span></div>
     </div> : null}
     <button onClick={reserve} disabled={blocked} className="mt-5 min-h-14 w-full rounded-xl bg-action text-[16px] font-bold text-white transition-opacity hover:opacity-90 disabled:opacity-40">Book now & pay at stay</button>
     <p className="mt-2.5 text-center text-[13px] text-muted">You won’t pay anything now.</p>

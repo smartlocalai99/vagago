@@ -8,6 +8,7 @@ import { Icon } from '@/components/icon';
 import { useStays } from '@/state/catalog-context';
 import { useBookings, type Booking } from '@/state/bookings-context';
 import { LoginPrompt, useGate } from '@/components/account-gate';
+import { Reveal } from '@/components/motion';
 import { getTodayInKolkata } from '@vagago/domain';
 import { colors, fonts } from '@/theme';
 
@@ -40,9 +41,9 @@ export default function Bookings() {
     {gate === 'signed-out' ? <LoginPrompt title="Log in to see your bookings" body="Your upcoming, past and cancelled stays appear here, with the exact address and directions." />
       : gate === 'loading' ? null
       : visible.length ? <View style={{ gap: 18 }}>
-      {visible.map((booking) => {
+      {visible.map((booking, index) => {
         const stay = stays.find((item) => item.id === booking.stayId);
-        return <Pressable key={booking.id} accessibilityRole="button" accessibilityLabel={`${stay?.name ?? 'Your stay'}, ${formatDate(booking.checkIn)} to ${formatDate(booking.checkOut)}`}
+        return <Reveal key={booking.id} delay={Math.min(index, 6) * 70}><Pressable accessibilityRole="button" accessibilityLabel={`${stay?.name ?? 'Your stay'}, ${formatDate(booking.checkIn)} to ${formatDate(booking.checkOut)}`}
           onPress={() => router.push({ pathname: '/booking/[id]', params: { id: booking.id } })}
           style={({ pressed }) => ({ flexDirection: 'row', gap: 14, alignItems: 'center', opacity: pressed ? 0.7 : 1 })}>
           <Image source={stay?.thumbnail} contentFit="cover" cachePolicy="memory-disk" style={{ width: 92, height: 92, borderRadius: 12, backgroundColor: colors.stone }} accessible={false} />
@@ -53,7 +54,7 @@ export default function Bookings() {
             {(booking.status === 'confirmed' || booking.status === 'checked_in') && selected === 'Upcoming' ? <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5, paddingTop: 2 }}><Icon name="pin" size={13} /><AppText style={{ fontSize: 11, color: colors.pine, fontFamily: fonts.semibold }}>Address and directions</AppText></View> : null}
           </View>
           <Icon name="chevron" size={16} color={colors.fern} />
-        </Pressable>;
+        </Pressable></Reveal>;
       })}
     </View> : <EmptyState icon="ticket" title={`No ${selected.toLowerCase()} bookings`} body={description} action="Explore stays" onAction={() => router.navigate('/')} />}
   </Page>;

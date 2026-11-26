@@ -29,7 +29,7 @@ export default function Profile() {
   const { account, logout, setLock, deleteAccount, canLock } = useAccount();
   const open = (path: string) => void Linking.openURL(`${siteUrl}${path}`);
 
-  const confirmLogout = () => Alert.alert('Log out?', account?.lock ? 'Log back in any time with Face ID or your screen lock.' : 'You’ll enter your name and number to log in again.', [
+  const confirmLogout = () => Alert.alert('Log out?', account?.lock ? 'Log back in any time with your mobile number and Face ID or your screen lock.' : 'Log back in any time with your mobile number.', [
     { text: 'Stay logged in', style: 'cancel' },
     { text: 'Log out', style: 'destructive', onPress: () => void logout() },
   ]);
@@ -60,7 +60,7 @@ export default function Profile() {
             <Icon name="lock" size={21} />
             <View style={{ flex: 1, gap: 2 }}>
               <AppText style={{ fontFamily: fonts.semibold }}>Log in with Face ID or screen lock</AppText>
-              <AppText style={{ fontSize: 12, color: colors.fern }}>{account.lock ? 'On: after logging out, log back in with one tap' : 'Off: tap to turn on'}</AppText>
+              <AppText style={{ fontSize: 12, color: colors.fern }}>{account.lock ? 'On: your number plus Face ID logs you back in' : 'Off: tap to turn on'}</AppText>
             </View>
             <View style={{ paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12, backgroundColor: account.lock ? colors.softSave : colors.canvas }}>
               <Text style={{ fontFamily: fonts.bold, fontSize: 11, color: account.lock ? colors.save : colors.fern }}>{account.lock ? 'On' : 'Off'}</Text>
