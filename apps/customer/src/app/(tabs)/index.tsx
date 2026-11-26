@@ -50,7 +50,7 @@ export default function Explore() {
   const sortLabel = sortOptions.find((option) => option.id === sort)!.label;
 
   // The whole screen zooms in from the distance after launch, as in the reference.
-  return <LeaveListContext value={leaveList}><Reveal from="zoom" duration={640} style={{ flex: 1, backgroundColor: colors.white }}><Animated.View style={[{ flex: 1 }, leaveStyle]}>
+  return <LeaveListContext value={leaveList}><Reveal from="zoom" duration={480} style={{ flex: 1, backgroundColor: colors.white }}><Animated.View style={[{ flex: 1 }, leaveStyle]}>
     <View style={{ paddingTop: insets.top + 8, paddingBottom: 12, backgroundColor: colors.white, borderBottomWidth: 1, borderColor: colors.stone, gap: 12 }}>
       <View style={{ marginHorizontal: 16, flexDirection: 'row', alignItems: 'center', gap: 10, minHeight: 50, paddingHorizontal: 14, borderRadius: 12, borderCurve: 'continuous', backgroundColor: colors.canvas, borderWidth: 1, borderColor: colors.stone }}>
         <Icon name="search" size={20} color={colors.ink} />
@@ -81,12 +81,12 @@ export default function Explore() {
 
       {!draft.query ? <View style={{ gap: 12, paddingBottom: 22 }}>
         <SectionTitle>Places to visit</SectionTitle>
-        <PlacesRow delay={380} />
+        <PlacesRow delay={260} />
       </View> : null}
 
       {deals.length >= 2 ? <View style={{ gap: 4, paddingBottom: 18 }}>
         <SectionTitle>Best deals in Vagamon</SectionTitle>
-        <Reveal delay={460} duration={640} from="right"><DealCarousel stays={deals} /></Reveal>
+        <Reveal delay={320} duration={520} from="right"><DealCarousel stays={deals} /></Reveal>
       </View> : null}
 
       <View style={{ flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between', gap: 12, paddingHorizontal: 16, paddingBottom: 12 }}>

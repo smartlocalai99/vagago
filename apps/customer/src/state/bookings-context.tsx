@@ -14,6 +14,8 @@ export type Booking = {
   guests: number;
   nights: number;
   total: number;
+  discount: number;
+  offerCode: string | null;
   guest: BookingGuest;
   status: BookingStatus;
   createdAt: string;
@@ -24,6 +26,7 @@ export type NewBooking = {
   checkOut: string;
   guests: number;
   guest: BookingGuest;
+  offerCode?: string | null;
 };
 export type ExactAddress = {
   addressLine: string;
@@ -46,15 +49,15 @@ type BookingsState = {
 };
 
 const BookingsContext = createContext<BookingsState | null>(null);
-const cacheKey = '@vagago/reservations:v1';
+const cacheKey = '@vagago/reservations:v2';
 const addressKey = '@vagago/addresses:v1';
 // Bookings only change when the guest or the property acts, so refetch at most once a minute.
 const minRefreshMs = 60 * 1000;
-const columns = 'id, reference, property_id, room_type_id, check_in, check_out, guests, nights, total_paise, guest_name, guest_phone, guest_email, status, created_at';
+const columns = 'id, reference, property_id, room_type_id, check_in, check_out, guests, nights, total_paise, discount_paise, offer_code, guest_name, guest_phone, guest_email, status, created_at';
 
 type ReservationRow = {
   id: string; reference: string; property_id: string; room_type_id: string; check_in: string; check_out: string;
-  guests: number; nights: number | null; total_paise: number; guest_name: string; guest_phone: string; guest_email: string | null;
+  guests: number; nights: number | null; total_paise: number; discount_paise: number | null; offer_code: string | null; guest_name: string; guest_phone: string; guest_email: string | null;
   status: BookingStatus; created_at: string;
 };
 
@@ -62,6 +65,7 @@ function toBooking(row: ReservationRow): Booking {
   return {
     id: row.id, reference: row.reference, stayId: row.property_id, roomOptionId: row.room_type_id,
     checkIn: row.check_in, checkOut: row.check_out, guests: row.guests, nights: row.nights ?? 0, total: row.total_paise / 100,
+    discount: (row.discount_paise ?? 0) / 100, offerCode: row.offer_code ?? null,
     guest: { fullName: row.guest_name, mobile: row.guest_phone, email: row.guest_email ?? '' },
     status: row.status, createdAt: row.created_at,
   };
@@ -75,7 +79,7 @@ const friendlyErrors: Record<string, string> = {
 function bookingError(message: string) {
   const known = Object.keys(friendlyErrors).find((key) => message.includes(key));
   if (known) return friendlyErrors[known];
-  if (/fits up to|past|one year ahead|1 to 30 nights/i.test(message)) return message;
+  if (/fits up to|past|one year ahead|1 to 30 nights|offer/i.test(message)) return message;
   return 'Couldn’t confirm your booking. Check your connection and try again.';
 }
 
@@ -129,6 +133,7 @@ export function BookingsProvider({ children }: { children: ReactNode }) {
     const { data, error } = await supabase.rpc('create_reservation', {
       p_room_type_id: input.roomOptionId, p_check_in: input.checkIn, p_check_out: input.checkOut, p_guests: input.guests,
       p_guest_name: input.guest.fullName, p_guest_phone: input.guest.mobile, p_guest_email: input.guest.email || undefined,
+      p_offer_code: input.offerCode ?? undefined,
     });
     if (error || !data) throw new Error(bookingError(error?.message ?? ''));
     const booking = toBooking(data as unknown as ReservationRow);

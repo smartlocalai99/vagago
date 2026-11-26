@@ -7,6 +7,7 @@ import { formatDate } from '@/components/escape-summary';
 import { Icon } from '@/components/icon';
 import { useStays } from '@/state/catalog-context';
 import { useBookings, type Booking } from '@/state/bookings-context';
+import { LockedPrompt, LoginPrompt, useGate } from '@/components/account-gate';
 import { getTodayInKolkata } from '@vagago/domain';
 import { colors, fonts } from '@/theme';
 
@@ -21,6 +22,7 @@ function tabFor(booking: Booking, today: string): BookingTab {
 export default function Bookings() {
   const [selected, setSelected] = useState<BookingTab>('Upcoming');
   const { bookings, refresh } = useBookings();
+  const gate = useGate();
   const stays = useStays();
   useFocusEffect(useCallback(() => { void refresh(); }, [refresh]));
   const today = getTodayInKolkata();
@@ -35,7 +37,10 @@ export default function Bookings() {
     <View style={{ flexDirection: 'row', borderBottomWidth: 1, borderColor: colors.stone }}>
       {bookingTabs.map((tab) => <Pressable key={tab} accessibilityRole="tab" accessibilityState={{ selected: selected === tab }} aria-selected={selected === tab} onPress={() => setSelected(tab)} style={{ flex: 1, alignItems: 'center', paddingVertical: 14, borderBottomWidth: 2, borderColor: selected === tab ? colors.pine : 'transparent' }}><AppText style={{ fontFamily: selected === tab ? fonts.bold : fonts.medium, fontSize: 12, color: selected === tab ? colors.pine : colors.fern }}>{tab}</AppText></Pressable>)}
     </View>
-    {visible.length ? <View style={{ gap: 18 }}>
+    {gate === 'signed-out' ? <LoginPrompt title="Log in to see your bookings" body="Your upcoming, past and cancelled stays appear here, with the exact address and directions." />
+      : gate === 'locked' ? <LockedPrompt />
+      : gate === 'loading' ? null
+      : visible.length ? <View style={{ gap: 18 }}>
       {visible.map((booking) => {
         const stay = stays.find((item) => item.id === booking.stayId);
         return <Pressable key={booking.id} accessibilityRole="button" accessibilityLabel={`${stay?.name ?? 'Your stay'}, ${formatDate(booking.checkIn)} to ${formatDate(booking.checkOut)}`}

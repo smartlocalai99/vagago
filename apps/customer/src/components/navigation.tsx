@@ -36,7 +36,7 @@ export function Navigation({ state, navigation }: TabBarProps) {
 
   // The bar rises in last, after the first screen has zoomed into place.
   useEffect(() => {
-    if (launched) rise.set(withDelay(650, withTiming(1, { duration: 520, easing: ease })));
+    if (launched) rise.set(withDelay(420, withTiming(1, { duration: 420, easing: ease })));
   }, [launched, rise]);
 
   const movePill = (key: string) => {

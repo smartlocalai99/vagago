@@ -8,6 +8,8 @@ import { AppText, Button, EmptyState, Heading, Page } from '@/components/ui';
 import { formatDate } from '@/components/escape-summary';
 import { Icon } from '@/components/icon';
 import { useEscape, validateBookingGuest } from '@/state/escape-context';
+import { useBookings } from '@/state/bookings-context';
+import { availableOffers } from '@/data/offers';
 import { money } from '@/data/stays';
 import { useStays } from '@/state/catalog-context';
 import { getRoomOptions } from '@/data/room-options';
@@ -15,6 +17,7 @@ import { colors, fonts } from '@/theme';
 
 export default function Review() {
   const { draft, bookingGuest, updateBookingGuest } = useEscape();
+  const offerPercent = Math.max(...availableOffers(useBookings().bookings).map((offer) => offer.percent));
   const stays = useStays();
   const insets = useSafeAreaInsets();
   const [submitted, setSubmitted] = useState(false);
@@ -71,6 +74,7 @@ export default function Review() {
         <Heading size={18}>Price details</Heading>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 12 }}><AppText style={{ fontSize: 13 }}>{money(room.nightlyRate)} × {estimate.nights} {estimate.nights === 1 ? 'night' : 'nights'}</AppText><AppText selectable style={{ fontSize: 13 }}>{money(estimate.subtotal)}</AppText></View>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 12 }}><AppText style={{ fontSize: 12, color: colors.fern }}>Taxes and fees</AppText><AppText style={{ fontSize: 12, color: colors.fern }}>Paid at the property</AppText></View>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, padding: 12, borderRadius: 12, backgroundColor: colors.softSave }}><Icon name="tag" size={16} color={colors.save} /><AppText style={{ flex: 1, fontSize: 12, color: colors.save, fontFamily: fonts.semibold }}>Offers up to {offerPercent}% off are applied at the next step.</AppText></View>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 12, borderTopWidth: 1, borderColor: colors.stone, paddingTop: 14 }}><AppText style={{ fontFamily: fonts.bold, fontSize: 13, flex: 1 }}>Estimated subtotal</AppText><AppText selectable style={{ fontFamily: fonts.bold, fontSize: 18 }}>{money(estimate.subtotal)}</AppText></View>
       </View>
     </ScrollView>

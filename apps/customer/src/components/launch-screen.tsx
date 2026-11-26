@@ -17,9 +17,10 @@ const wordWidth = markWidth * 748 / 501;
 const wordHeight = wordWidth * 211 / 748;
 const gap = 16;
 const lift = (gap + wordHeight) / 2;
-const revealMs = 520;
-const holdMs = 380;
-const exitMs = 320;
+// Kept short: the app should feel instant.
+const revealMs = 380;
+const holdMs = 120;
+const exitMs = 240;
 
 export function BrandMark({ size = 44, onLoadEnd }: { size?: number; onLoadEnd?: () => void }) {
   const innerWidth = size * 0.9;

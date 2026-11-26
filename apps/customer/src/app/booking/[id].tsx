@@ -81,6 +81,7 @@ export default function BookingDetails() {
         <Row label="Guests" value={`${booking.guests} ${booking.guests === 1 ? 'guest' : 'guests'} · ${booking.nights} ${booking.nights === 1 ? 'night' : 'nights'}`} />
         {room ? <Row label="Stay" value={room.name} /> : null}
         <Row label="Booked by" value={booking.guest.fullName} />
+        {booking.discount > 0 ? <Row label="Offer" value={`${booking.offerCode ?? 'Offer'} · you saved ${money(booking.discount)}`} /> : null}
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 12, borderTopWidth: 1, borderColor: colors.stone, paddingTop: 12 }}>
           <AppText style={{ fontSize: 13, fontFamily: fonts.bold }}>Pay at check-in</AppText>
           <AppText selectable style={{ fontSize: 17, fontFamily: fonts.bold }}>{money(booking.total)}</AppText>

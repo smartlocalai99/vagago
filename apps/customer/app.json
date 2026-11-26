@@ -2,7 +2,7 @@
   "expo": {
     "name": "VagaGo",
     "slug": "vagago-customer",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -20,9 +20,7 @@
         "foregroundImage": "./assets/icon.png",
         "backgroundColor": "#183E34"
       },
-      "permissions": [
-        "android.permission.ACCESS_COARSE_LOCATION",
-        "android.permission.ACCESS_FINE_LOCATION",
+      "blockedPermissions": [
         "android.permission.ACCESS_COARSE_LOCATION",
         "android.permission.ACCESS_FINE_LOCATION"
       ]
@@ -47,18 +45,12 @@
         }
       ],
       [
-        "expo-location",
+        "expo-local-authentication",
         {
-          "locationWhenInUsePermission": "Allow VagaGo to use your location to show your approximate distance from Vagamon while you explore stays.",
-          "locationAlwaysPermission": false,
-          "locationAlwaysAndWhenInUsePermission": "VagaGo only uses your location while the app is open, to show how far you are from stays and places in Vagamon.",
-          "motionUsagePermission": "VagaGo does not use motion data.",
-          "isIosBackgroundLocationEnabled": false,
-          "isAndroidBackgroundLocationEnabled": false,
-          "isAndroidForegroundServiceEnabled": false,
-          "isAndroidMotionActivityEnabled": false
+          "faceIDPermission": "Allow VagaGo to use Face ID to keep your profile and bookings private."
         }
-      ]
+      ],
+      "expo-secure-store"
     ],
     "scheme": "vagago",
     "experiments": {

@@ -608,12 +608,14 @@ export type Database = {
           created_at: string
           currency: string
           customer_id: string
+          discount_paise: number
           guest_email: string | null
           guest_name: string
           guest_phone: string
           guests: number
           id: string
           nights: number | null
+          offer_code: string | null
           payment_method: Database["public"]["Enums"]["payment_method"]
           payment_status: Database["public"]["Enums"]["payment_status"]
           property_id: string
@@ -636,12 +638,14 @@ export type Database = {
           created_at?: string
           currency?: string
           customer_id: string
+          discount_paise?: number
           guest_email?: string | null
           guest_name: string
           guest_phone: string
           guests: number
           id?: string
           nights?: number | null
+          offer_code?: string | null
           payment_method?: Database["public"]["Enums"]["payment_method"]
           payment_status?: Database["public"]["Enums"]["payment_status"]
           property_id: string
@@ -664,12 +668,14 @@ export type Database = {
           created_at?: string
           currency?: string
           customer_id?: string
+          discount_paise?: number
           guest_email?: string | null
           guest_name?: string
           guest_phone?: string
           guests?: number
           id?: string
           nights?: number | null
+          offer_code?: string | null
           payment_method?: Database["public"]["Enums"]["payment_method"]
           payment_status?: Database["public"]["Enums"]["payment_status"]
           property_id?: string
@@ -854,12 +860,14 @@ export type Database = {
           created_at: string
           currency: string
           customer_id: string
+          discount_paise: number
           guest_email: string | null
           guest_name: string
           guest_phone: string
           guests: number
           id: string
           nights: number | null
+          offer_code: string | null
           payment_method: Database["public"]["Enums"]["payment_method"]
           payment_status: Database["public"]["Enums"]["payment_status"]
           property_id: string
@@ -888,6 +896,7 @@ export type Database = {
           p_guest_name: string
           p_guest_phone: string
           p_guests: number
+          p_offer_code?: string
           p_room_type_id: string
           p_special_requests?: string
         }
@@ -900,12 +909,14 @@ export type Database = {
           created_at: string
           currency: string
           customer_id: string
+          discount_paise: number
           guest_email: string | null
           guest_name: string
           guest_phone: string
           guests: number
           id: string
           nights: number | null
+          offer_code: string | null
           payment_method: Database["public"]["Enums"]["payment_method"]
           payment_status: Database["public"]["Enums"]["payment_status"]
           property_id: string
@@ -961,12 +972,14 @@ export type Database = {
           created_at: string
           currency: string
           customer_id: string
+          discount_paise: number
           guest_email: string | null
           guest_name: string
           guest_phone: string
           guests: number
           id: string
           nights: number | null
+          offer_code: string | null
           payment_method: Database["public"]["Enums"]["payment_method"]
           payment_status: Database["public"]["Enums"]["payment_status"]
           property_id: string
