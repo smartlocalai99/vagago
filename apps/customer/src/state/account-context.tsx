@@ -4,21 +4,26 @@ import * as SecureStore from 'expo-secure-store';
 import { supabase } from '@/lib/supabase';
 import { useEscape } from './escape-context';
 
-export type Account = { name: string; mobile: string; lock: boolean; since: string };
+// lock: the guest chose Face ID, fingerprint or the screen lock as their way to log back in.
+export type Account = { name: string; mobile: string; lock: boolean; since: string; signedIn: boolean };
 
 type AccountState = {
   ready: boolean;
+  // The signed-in guest, or null.
   account: Account | null;
-  // False until Face ID or the screen lock has been passed in this app session (when the lock is on).
-  unlocked: boolean;
-  login: (details: { name: string; mobile: string; lock: boolean }) => Promise<string | null>;
-  unlock: () => Promise<boolean>;
-  logout: () => Promise<void>;
+  // Details kept after logging out with a lock, so the guest can log back in with one tap.
+  saved: Account | null;
   canLock: boolean;
+  signUp: (details: { name: string; mobile: string; lock: boolean }) => Promise<string | null>;
+  logInWithLock: () => Promise<string | null>;
+  setLock: (lock: boolean) => Promise<void>;
+  forgetSaved: () => Promise<void>;
+  logout: () => Promise<void>;
+  deleteAccount: () => Promise<string | null>;
 };
 
 const AccountContext = createContext<AccountState | null>(null);
-// Stored in the iOS Keychain / Android Keystore. It stays until the guest logs out.
+// Stored in the iOS Keychain / Android Keystore. Signed in until the guest logs out.
 const storageKey = 'vagago.account.v1';
 
 export function validateAccount(name: string, mobile: string) {
@@ -32,11 +37,12 @@ async function verifyOwner(reason: string) {
   return result.success;
 }
 
+const persist = (account: Account) => SecureStore.setItemAsync(storageKey, JSON.stringify(account));
+
 export function AccountProvider({ children }: { children: ReactNode }) {
   const { updateBookingGuest } = useEscape();
   const [ready, setReady] = useState(false);
-  const [account, setAccount] = useState<Account | null>(null);
-  const [unlocked, setUnlocked] = useState(false);
+  const [stored, setStored] = useState<Account | null>(null);
   const [canLock, setCanLock] = useState(false);
 
   useEffect(() => {
@@ -44,51 +50,89 @@ export function AccountProvider({ children }: { children: ReactNode }) {
       SecureStore.getItemAsync(storageKey).catch(() => null),
       Promise.all([LocalAuthentication.hasHardwareAsync(), LocalAuthentication.getEnrolledLevelAsync()])
         .then(([hardware, level]) => hardware || level !== LocalAuthentication.SecurityLevel.NONE).catch(() => false),
-    ]).then(([saved, lockAvailable]) => {
-      const parsed = saved ? JSON.parse(saved) as Account : null;
-      setAccount(parsed);
-      setUnlocked(!parsed?.lock);
+    ]).then(([raw, lockAvailable]) => {
+      const parsed = raw ? { signedIn: true, ...JSON.parse(raw) } as Account : null;
+      setStored(parsed);
       setCanLock(lockAvailable);
-      if (parsed) updateBookingGuest({ fullName: parsed.name, mobile: parsed.mobile });
+      if (parsed?.signedIn) updateBookingGuest({ fullName: parsed.name, mobile: parsed.mobile });
       setReady(true);
     });
   }, [updateBookingGuest]);
 
-  const login = useCallback(async ({ name, mobile, lock }: { name: string; mobile: string; lock: boolean }) => {
-    const problem = validateAccount(name, mobile);
-    if (problem) return problem;
-    if (lock && !await verifyOwner('Turn on Face ID or screen lock for VagaGo')) return 'Face ID or screen lock was not confirmed.';
-    const next: Account = { name: name.trim(), mobile: mobile.replace(/[\s-]/g, ''), lock, since: new Date().toISOString() };
-    await SecureStore.setItemAsync(storageKey, JSON.stringify(next));
-    setAccount(next);
-    setUnlocked(true);
+  const signIn = useCallback(async (next: Account) => {
+    await persist(next);
+    setStored(next);
     updateBookingGuest({ fullName: next.name, mobile: next.mobile });
     // Bookings belong to this phone's guest session; keep its profile in step (best effort).
     void (async () => {
       let { data } = await supabase.auth.getSession();
-      if (!data.session) await supabase.auth.signInAnonymously().then(async () => { data = (await supabase.auth.getSession()).data; });
+      if (!data.session) {
+        await supabase.auth.signInAnonymously();
+        data = (await supabase.auth.getSession()).data;
+      }
       const userId = data.session?.user.id;
       if (userId) await supabase.from('profiles').update({ full_name: next.name, phone: next.mobile }).eq('id', userId);
     })().catch(() => undefined);
-    return null;
   }, [updateBookingGuest]);
 
-  const unlock = useCallback(async () => {
-    const ok = await verifyOwner('Unlock VagaGo');
-    if (ok) setUnlocked(true);
-    return ok;
+  const signUp = useCallback(async ({ name, mobile, lock }: { name: string; mobile: string; lock: boolean }) => {
+    const problem = validateAccount(name, mobile);
+    if (problem) return problem;
+    // Confirm once that the owner can unlock, since this becomes their way back in.
+    if (lock && !await verifyOwner('Use Face ID or your screen lock to log in to VagaGo')) return 'Face ID or screen lock was not confirmed.';
+    await signIn({ name: name.trim(), mobile: mobile.replace(/[\s-]/g, ''), lock, since: new Date().toISOString(), signedIn: true });
+    return null;
+  }, [signIn]);
+
+  const logInWithLock = useCallback(async () => {
+    if (!stored) return 'No saved account on this phone.';
+    if (!await verifyOwner(`Log in as ${stored.name}`)) return 'Face ID or screen lock was not confirmed.';
+    await signIn({ ...stored, signedIn: true });
+    return null;
+  }, [signIn, stored]);
+
+  const setLock = useCallback(async (lock: boolean) => {
+    if (!stored) return;
+    if (lock && !await verifyOwner('Use Face ID or your screen lock to log in to VagaGo')) return;
+    const next = { ...stored, lock };
+    await persist(next);
+    setStored(next);
+  }, [stored]);
+
+  const forgetSaved = useCallback(async () => {
+    await SecureStore.deleteItemAsync(storageKey);
+    setStored(null);
   }, []);
 
-  // Logging out forgets the profile on this phone. The phone's guest session is kept, so
-  // bookings made here come back when the guest logs in again.
+  // With a lock the details stay saved for a one-tap Face ID login; without one they are removed.
+  // The phone's guest session is kept, so bookings made here come back after logging in again.
   const logout = useCallback(async () => {
-    await SecureStore.deleteItemAsync(storageKey);
-    setAccount(null);
-    setUnlocked(false);
+    if (stored?.lock) {
+      const next = { ...stored, signedIn: false };
+      await persist(next);
+      setStored(next);
+    } else {
+      await forgetSaved();
+    }
     updateBookingGuest({ fullName: '', mobile: '' });
-  }, [updateBookingGuest]);
+  }, [forgetSaved, stored, updateBookingGuest]);
 
-  const value = useMemo(() => ({ ready, account, unlocked, login, unlock, logout, canLock }), [ready, account, unlocked, login, unlock, logout, canLock]);
+  const deleteAccount = useCallback(async () => {
+    const { data } = await supabase.auth.getSession();
+    if (data.session) {
+      const { error } = await supabase.rpc('delete_my_account');
+      if (error) return 'Couldn’t delete your account. Check your connection and try again.';
+      await supabase.auth.signOut();
+    }
+    await forgetSaved();
+    updateBookingGuest({ fullName: '', mobile: '', email: '' });
+    return null;
+  }, [forgetSaved, updateBookingGuest]);
+
+  const account = stored?.signedIn ? stored : null;
+  const saved = stored && !stored.signedIn ? stored : null;
+  const value = useMemo(() => ({ ready, account, saved, canLock, signUp, logInWithLock, setLock, forgetSaved, logout, deleteAccount }),
+    [ready, account, saved, canLock, signUp, logInWithLock, setLock, forgetSaved, logout, deleteAccount]);
   return <AccountContext value={value}>{children}</AccountContext>;
 }
 

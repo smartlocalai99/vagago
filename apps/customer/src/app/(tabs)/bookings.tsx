@@ -7,7 +7,7 @@ import { formatDate } from '@/components/escape-summary';
 import { Icon } from '@/components/icon';
 import { useStays } from '@/state/catalog-context';
 import { useBookings, type Booking } from '@/state/bookings-context';
-import { LockedPrompt, LoginPrompt, useGate } from '@/components/account-gate';
+import { LoginPrompt, useGate } from '@/components/account-gate';
 import { getTodayInKolkata } from '@vagago/domain';
 import { colors, fonts } from '@/theme';
 
@@ -38,7 +38,6 @@ export default function Bookings() {
       {bookingTabs.map((tab) => <Pressable key={tab} accessibilityRole="tab" accessibilityState={{ selected: selected === tab }} aria-selected={selected === tab} onPress={() => setSelected(tab)} style={{ flex: 1, alignItems: 'center', paddingVertical: 14, borderBottomWidth: 2, borderColor: selected === tab ? colors.pine : 'transparent' }}><AppText style={{ fontFamily: selected === tab ? fonts.bold : fonts.medium, fontSize: 12, color: selected === tab ? colors.pine : colors.fern }}>{tab}</AppText></Pressable>)}
     </View>
     {gate === 'signed-out' ? <LoginPrompt title="Log in to see your bookings" body="Your upcoming, past and cancelled stays appear here, with the exact address and directions." />
-      : gate === 'locked' ? <LockedPrompt />
       : gate === 'loading' ? null
       : visible.length ? <View style={{ gap: 18 }}>
       {visible.map((booking) => {

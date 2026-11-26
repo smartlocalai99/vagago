@@ -1,4 +1,3 @@
-import { useEffect, useRef } from 'react';
 import { Text, View } from 'react-native';
 import { router } from 'expo-router';
 import { Icon, type IconName } from '@/components/icon';
@@ -7,13 +6,12 @@ import { Button } from '@/components/ui';
 import { useAccount } from '@/state/account-context';
 import { colors, fonts } from '@/theme';
 
-export type GateState = 'loading' | 'signed-out' | 'locked' | 'open';
+export type GateState = 'loading' | 'signed-out' | 'open';
 
 export function useGate(): GateState {
-  const { ready, account, unlocked } = useAccount();
+  const { ready, account } = useAccount();
   if (!ready) return 'loading';
-  if (!account) return 'signed-out';
-  return unlocked ? 'open' : 'locked';
+  return account ? 'open' : 'signed-out';
 }
 
 function Prompt({ icon, title, body, action, onAction }: { icon: IconName; title: string; body: string; action: string; onAction: () => void }) {
@@ -31,14 +29,3 @@ export function LoginPrompt({ title, body }: { title: string; body: string }) {
   return <Prompt icon="user" title={title} body={body} action="Log in" onAction={() => router.push('/login')} />;
 }
 
-// Asks for Face ID or the screen lock once when shown, and again on tap.
-export function LockedPrompt() {
-  const { unlock } = useAccount();
-  const asked = useRef(false);
-  useEffect(() => {
-    if (asked.current) return;
-    asked.current = true;
-    void unlock();
-  }, [unlock]);
-  return <Prompt icon="lock" title="VagaGo is locked" body="Use Face ID or your screen lock to see your profile and bookings." action="Unlock" onAction={() => void unlock()} />;
-}

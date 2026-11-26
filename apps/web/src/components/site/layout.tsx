@@ -56,6 +56,10 @@ function Footer() {
         <ul className="space-y-2 text-[15px] text-white/75">
           <li><Link href="/trips/" className="hover:text-white">My bookings</Link></li>
           <li><Link href="/#how-it-works" className="hover:text-white">How booking works</Link></li>
+          <li><Link href="/support/" className="hover:text-white">Contact support</Link></li>
+          <li><Link href="/privacy/" className="hover:text-white">Privacy policy</Link></li>
+          <li><Link href="/terms/" className="hover:text-white">Terms of use</Link></li>
+          <li><Link href="/delete-account/" className="hover:text-white">Delete your account</Link></li>
           <li><Link href="/credits/" className="hover:text-white">Photo credits</Link></li>
         </ul>
       </div>

@@ -47,6 +47,7 @@ function AppScreens({ storageError, dismissStorageError }: { storageError: strin
         <Stack.Screen name="booking/[id]" options={{ title: 'Your booking' }} />
         <Stack.Screen name="faq" options={{ title: 'Questions and answers' }} />
         <Stack.Screen name="login" options={{ title: 'Log in', presentation: 'modal' }} />
+        <Stack.Screen name="support" options={{ title: 'Contact support' }} />
     </Stack>
   </View>;
 }
