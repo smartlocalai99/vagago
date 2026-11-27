@@ -39,7 +39,13 @@ async function verifyOwner(reason: string) {
   return result.success;
 }
 
-const persist = (account: Account) => SecureStore.setItemAsync(storageKey, JSON.stringify(account));
+// The Keychain / Keystore on phones; browser storage in the web preview, which has no secure store.
+const vault = process.env.EXPO_OS === 'web' ? {
+  setItemAsync: async (key: string, value: string) => localStorage.setItem(key, value),
+  getItemAsync: async (key: string) => localStorage.getItem(key),
+  deleteItemAsync: async (key: string) => localStorage.removeItem(key),
+} : SecureStore;
+const persist = (account: Account) => vault.setItemAsync(storageKey, JSON.stringify(account));
 
 export function AccountProvider({ children }: { children: ReactNode }) {
   const { updateBookingGuest } = useEscape();
@@ -49,7 +55,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     void Promise.all([
-      SecureStore.getItemAsync(storageKey).catch(() => null),
+      vault.getItemAsync(storageKey).catch(() => null),
       Promise.all([LocalAuthentication.hasHardwareAsync(), LocalAuthentication.getEnrolledLevelAsync()])
         .then(([hardware, level]) => hardware || level !== LocalAuthentication.SecurityLevel.NONE).catch(() => false),
     ]).then(([raw, lockAvailable]) => {
@@ -105,7 +111,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
   }, [stored]);
 
   const forgetSaved = useCallback(async () => {
-    await SecureStore.deleteItemAsync(storageKey);
+    await vault.deleteItemAsync(storageKey);
     setStored(null);
   }, []);
 

@@ -22,6 +22,7 @@ import { getRoomOptions, type RoomOption } from '@/data/room-options';
 import { useEscape } from '@/state/escape-context';
 import { useAccount } from '@/state/account-context';
 import { colors, fonts } from '@/theme';
+import { bookingFee } from '@/data/offers';
 import type { Stay } from '@/types';
 
 const brandMark = require('../../../assets/splash-mark.png');
@@ -118,10 +119,10 @@ function StayDetailContent({ stay, initialPhoto }: { stay: Stay; initialPhoto: n
           </View>
         </Reveal>
 
-        <Reveal delay={80}><View style={{ backgroundColor: colors.brand, borderRadius: 16, borderCurve: 'continuous', padding: 18, flexDirection: 'row', alignItems: 'center', gap: 14 }}>
+        <Reveal delay={80}><View style={{ backgroundColor: colors.action, borderRadius: 16, borderCurve: 'continuous', padding: 18, flexDirection: 'row', alignItems: 'center', gap: 14 }}>
           <View style={{ flex: 1, gap: 6 }}>
-            <Text style={{ fontFamily: fonts.bold, fontSize: 19, lineHeight: 25, color: colors.white }}>Book for just ₹100</Text>
-            <Text style={{ fontFamily: fonts.regular, fontSize: 13, lineHeight: 19, color: 'rgba(255,255,255,0.8)' }}>Pay the ₹100 booking fee now and the rest at the stay. The exact address and directions unlock as soon as you book.</Text>
+            <Text style={{ fontFamily: fonts.bold, fontSize: 19, lineHeight: 25, color: colors.white }}>Book for just ₹{bookingFee}</Text>
+            <Text style={{ fontFamily: fonts.regular, fontSize: 13, lineHeight: 19, color: 'rgba(255,255,255,0.9)' }}>Pay the ₹{bookingFee} booking fee now and the rest at the stay. The exact address and directions unlock as soon as you book.</Text>
           </View>
           <Image source={brandMark} accessible={false} contentFit="contain" style={{ width: 62, height: 47 }} />
         </View></Reveal>
@@ -147,7 +148,7 @@ function StayDetailContent({ stay, initialPhoto }: { stay: Stay; initialPhoto: n
           <Heading size={19}>What this place offers</Heading>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
             {stay.amenities.map((amenity) => <View key={amenity} style={{ width: '47%', flexDirection: 'row', alignItems: 'center', gap: 9 }}>
-              <Icon name="check" size={18} color={colors.save} /><AppText style={{ fontSize: 13, flexShrink: 1 }}>{amenity}</AppText>
+              <Icon name="check" size={18} color={colors.ok} /><AppText style={{ fontSize: 13, flexShrink: 1 }}>{amenity}</AppText>
             </View>)}
           </View>
         </View> : null}
@@ -182,7 +183,7 @@ function StayDetailContent({ stay, initialPhoto }: { stay: Stay; initialPhoto: n
           <DealPrice rate={selected.nightlyRate} compareAtRate={selected.compareAtRate} size={24} showDiscount={false} />
           <AppText style={{ fontSize: 13, lineHeight: 18, color: colors.pine, fontFamily: fonts.medium }}>+ taxes & fees</AppText>
         </View>
-        <Button label="Book now" onPress={bookStay} disabled={Boolean(error)} icon={null} style={{ minHeight: 52, borderRadius: 12, paddingHorizontal: 18 }} />
+        <Button label="Book now" tone="book" onPress={bookStay} disabled={Boolean(error)} icon={null} style={{ minHeight: 52, borderRadius: 12, paddingHorizontal: 18 }} />
       </View>
     </View>
   </Reveal>;

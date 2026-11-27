@@ -21,8 +21,9 @@ export function Heading({ children, size = 22, style }: PropsWithChildren<{ size
 export function Eyebrow({ children, light = false }: PropsWithChildren<{ light?: boolean }>) {
   return <AppText style={{ fontFamily: fonts.semibold, fontSize: 11, lineHeight: 18, color: light ? colors.white : colors.fern }}>{children}</AppText>;
 }
-export function Button({ label, onPress, secondary = false, icon = null, disabled = false, style }: { label: string; onPress: () => void; secondary?: boolean; icon?: IconName | null; disabled?: boolean; style?: ViewStyle }) {
-  return <Pressable accessibilityRole="button" accessibilityLabel={label} accessibilityState={{ disabled }} disabled={disabled} onPress={onPress} style={({ pressed }) => [{ minHeight: 52, paddingHorizontal: 20, paddingVertical: 14, borderRadius: 14, borderCurve: 'continuous', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, backgroundColor: secondary ? colors.meadow : colors.pine, opacity: disabled ? 0.45 : pressed ? 0.8 : 1 }, style]}>
+// tone 'book' is the red used for the buttons that make a booking (Book now, Confirm booking).
+export function Button({ label, onPress, secondary = false, tone = 'brand', icon = null, disabled = false, style }: { label: string; onPress: () => void; secondary?: boolean; tone?: 'brand' | 'book'; icon?: IconName | null; disabled?: boolean; style?: ViewStyle }) {
+  return <Pressable accessibilityRole="button" accessibilityLabel={label} accessibilityState={{ disabled }} disabled={disabled} onPress={onPress} style={({ pressed }) => [{ minHeight: 52, paddingHorizontal: 20, paddingVertical: 14, borderRadius: 14, borderCurve: 'continuous', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, backgroundColor: secondary ? colors.meadow : tone === 'book' ? colors.action : colors.pine, opacity: disabled ? 0.45 : pressed ? 0.8 : 1 }, style]}>
     <AppText style={{ fontFamily: fonts.bold, fontSize: 14, color: secondary ? colors.pine : colors.white, textAlign: 'center', flexShrink: 1 }}>{label}</AppText>{icon ? <Icon name={icon} size={18} color={secondary ? colors.pine : colors.white} /> : null}
   </Pressable>;
 }

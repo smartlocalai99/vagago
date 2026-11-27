@@ -125,4 +125,4 @@ export async function fetchPublishedReviews(limit = 8): Promise<GuestReview[]> {
 }
 
 // Flat fee the database adds to every booking (create_reservation), in paise.
-export const bookingFeePaise = 10000;
+export const bookingFeePaise = 24900;

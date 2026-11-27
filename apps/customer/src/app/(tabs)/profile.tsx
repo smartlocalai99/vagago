@@ -62,8 +62,8 @@ export default function Profile() {
               <AppText style={{ fontFamily: fonts.semibold }}>Log in with Face ID or screen lock</AppText>
               <AppText style={{ fontSize: 12, color: colors.fern }}>{account.lock ? 'On: your number plus Face ID logs you back in' : 'Off: tap to turn on'}</AppText>
             </View>
-            <View style={{ paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12, backgroundColor: account.lock ? colors.softSave : colors.canvas }}>
-              <Text style={{ fontFamily: fonts.bold, fontSize: 11, color: account.lock ? colors.save : colors.fern }}>{account.lock ? 'On' : 'Off'}</Text>
+            <View style={{ paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12, backgroundColor: account.lock ? colors.softOk : colors.canvas }}>
+              <Text style={{ fontFamily: fonts.bold, fontSize: 11, color: account.lock ? colors.ok : colors.fern }}>{account.lock ? 'On' : 'Off'}</Text>
             </View>
           </Pressable>
         </Reveal> : null}

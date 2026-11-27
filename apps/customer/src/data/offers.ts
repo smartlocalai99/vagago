@@ -39,4 +39,4 @@ export function availableOffers(bookings: Booking[]): Offer[] {
 export const discountFor = (amount: number, offer: Offer | null) => offer ? Math.round(amount * offer.percent / 100) : 0;
 
 // Flat fee the database adds to every booking (create_reservation), in rupees.
-export const bookingFee = 100;
+export const bookingFee = 249;

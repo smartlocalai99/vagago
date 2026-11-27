@@ -46,9 +46,9 @@ export function ReviewForm({ booking }: { booking: Booking }) {
   };
 
   if (existing === undefined) return null;
-  if (existing) return <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center', backgroundColor: colors.softSave, borderRadius: 14, padding: 14 }}>
-    <Icon name="check" size={18} color={colors.save} />
-    <Text style={{ flex: 1, fontFamily: fonts.medium, fontSize: 13, lineHeight: 19, color: colors.save }}>{existing.status === 'published' ? 'Thanks for your review. It’s live on VagaGo.' : 'Thanks for your review. It appears on VagaGo once our team has checked it.'}</Text>
+  if (existing) return <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center', backgroundColor: colors.softOk, borderRadius: 14, padding: 14 }}>
+    <Icon name="check" size={18} color={colors.ok} />
+    <Text style={{ flex: 1, fontFamily: fonts.medium, fontSize: 13, lineHeight: 19, color: colors.ok }}>{existing.status === 'published' ? 'Thanks for your review. It’s live on VagaGo.' : 'Thanks for your review. It appears on VagaGo once our team has checked it.'}</Text>
   </View>;
 
   return <View style={{ gap: 12, borderWidth: 1, borderColor: colors.stone, borderRadius: 16, padding: 16 }}>

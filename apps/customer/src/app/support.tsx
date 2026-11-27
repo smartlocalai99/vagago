@@ -34,7 +34,7 @@ export default function Support() {
   };
 
   if (state === 'sent') return <View style={{ flex: 1, backgroundColor: colors.white, alignItems: 'center', justifyContent: 'center', padding: 28, gap: 14 }}>
-    <Reveal from="grow"><View style={{ width: 76, height: 76, borderRadius: 38, backgroundColor: colors.softSave, alignItems: 'center', justifyContent: 'center' }}><Icon name="check" size={34} color={colors.save} /></View></Reveal>
+    <Reveal from="grow"><View style={{ width: 76, height: 76, borderRadius: 38, backgroundColor: colors.softOk, alignItems: 'center', justifyContent: 'center' }}><Icon name="check" size={34} color={colors.ok} /></View></Reveal>
     <Reveal delay={80} style={{ alignItems: 'center', gap: 6 }}>
       <Text style={{ fontFamily: fonts.bold, fontSize: 21, color: colors.ink }}>Message sent</Text>
       <Text style={{ fontFamily: fonts.regular, fontSize: 14, lineHeight: 21, color: colors.fern, textAlign: 'center' }}>Thanks for writing. We’ll get back to you at {contact.trim()}.</Text>

@@ -34,17 +34,17 @@ export function BookingConfirmed({ reference }: { reference: string }) {
 // The flat booking fee, presented plainly: one small fixed amount, nothing hidden.
 export function BookingFeeCard() {
   return <Reveal from="grow" duration={460}>
-    <LinearGradient colors={['#E7EFEB', '#F4F8F5']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
-      style={{ flexDirection: 'row', alignItems: 'center', gap: 14, padding: 16, borderRadius: 18, borderWidth: 1, borderColor: '#CFE0D6' }}>
-      <View style={{ width: 64, height: 64, borderRadius: 18, backgroundColor: colors.brand, alignItems: 'center', justifyContent: 'center' }}>
-        <Text style={{ fontFamily: fonts.bold, fontSize: 11, color: 'rgba(255,255,255,0.75)' }}>FLAT</Text>
-        <Text style={{ fontFamily: fonts.bold, fontSize: 20, color: colors.white, marginTop: -2 }}>₹{bookingFee}</Text>
+    <LinearGradient colors={['#FDECEE', '#FFF8F4']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
+      style={{ flexDirection: 'row', alignItems: 'center', gap: 14, padding: 16, borderRadius: 18, borderWidth: 1, borderColor: '#F6CDD3' }}>
+      <View style={{ width: 64, height: 64, borderRadius: 18, backgroundColor: colors.action, alignItems: 'center', justifyContent: 'center' }}>
+        <Text style={{ fontFamily: fonts.bold, fontSize: 11, lineHeight: 14, color: 'rgba(255,255,255,0.8)' }}>FLAT</Text>
+        <Text adjustsFontSizeToFit numberOfLines={1} style={{ fontFamily: fonts.bold, fontSize: 20, lineHeight: 26, color: colors.white, paddingHorizontal: 4 }}>₹{bookingFee}</Text>
       </View>
       <View style={{ flex: 1, gap: 3 }}>
         <Text style={{ fontFamily: fonts.bold, fontSize: 15, color: colors.ink }}>Just ₹{bookingFee} booking fee</Text>
         <Text style={{ fontFamily: fonts.regular, fontSize: 12, lineHeight: 18, color: colors.fern }}>The same small fee on every booking, whatever the stay. No hidden charges, no surprises.</Text>
       </View>
-      <Icon name="shield" size={22} color={colors.save} />
+      <Icon name="shield" size={22} color={colors.action} />
     </LinearGradient>
   </Reveal>;
 }
