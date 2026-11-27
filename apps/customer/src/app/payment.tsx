@@ -64,7 +64,7 @@ export default function Payment() {
           const selected = method === item.id;
           return <Pressable key={item.id} accessibilityRole="radio" accessibilityLabel={item.title} accessibilityState={{ checked: selected, disabled: !item.available }} aria-checked={selected} disabled={!item.available} onPress={() => setMethod(item.id)} style={({ pressed }) => ({ padding: 16, borderWidth: selected ? 1.5 : 1, borderColor: selected ? colors.pine : colors.stone, borderRadius: 14, gap: 14, backgroundColor: selected ? colors.meadow : colors.white, opacity: !item.available ? 0.5 : pressed ? 0.8 : 1 })}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}><View style={{ width: 42, height: 42, borderRadius: 11, borderWidth: 1, borderColor: colors.stone, backgroundColor: colors.white, justifyContent: 'center', alignItems: 'center' }}><Icon name={item.icon} size={22} /></View><View style={{ flex: 1, gap: 3 }}><AppText style={{ fontFamily: fonts.bold, fontSize: 14 }}>{item.title}</AppText><AppText style={{ color: colors.fern, fontSize: 11, lineHeight: 17 }}>{item.subtitle}</AppText></View><View style={{ width: 21, height: 21, borderRadius: 11, borderWidth: 1.5, borderColor: selected ? colors.pine : colors.fern, alignItems: 'center', justifyContent: 'center' }}>{selected ? <View style={{ width: 11, height: 11, borderRadius: 6, backgroundColor: colors.pine }} /> : null}</View></View>
-            {selected ? <AppText style={{ fontSize: 11, lineHeight: 18, color: colors.fern, paddingTop: 11, borderTopWidth: 1, borderColor: colors.stone }}>Nothing to pay now. Settle the bill with your host at check-in.</AppText> : null}
+            {selected ? <AppText style={{ fontSize: 11, lineHeight: 18, color: colors.fern, paddingTop: 11, borderTopWidth: 1, borderColor: colors.stone }}>Only the {money(bookingFee)} booking fee now. Pay the remaining {money(payable - bookingFee)} to your host at check-in.</AppText> : null}
           </Pressable>;
         })}
       </View>
@@ -94,17 +94,27 @@ export default function Payment() {
         {offer ? <Animated.View key={offer.code} entering={FadeIn.duration(260)} exiting={FadeOut.duration(160)} style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 12 }}><AppText style={{ fontSize: 13, color: colors.save }}>{offer.title}</AppText><AppText selectable style={{ fontSize: 13, color: colors.save, fontFamily: fonts.semibold }}>− {money(discount)}</AppText></Animated.View> : null}
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 12 }}><AppText style={{ fontSize: 13 }}>Booking fee <AppText style={{ fontSize: 12, color: colors.save, fontFamily: fonts.semibold }}>flat</AppText></AppText><AppText selectable style={{ fontSize: 13 }}>{money(bookingFee)}</AppText></View>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 12, borderTopWidth: 1, borderColor: colors.stone, paddingTop: 12 }}><AppText style={{ fontSize: 14, fontFamily: fonts.bold }}>Total</AppText><AppText selectable style={{ fontSize: 15, fontFamily: fonts.bold }}>{money(payable)}</AppText></View>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 12 }}><AppText style={{ fontSize: 13, fontFamily: fonts.semibold, color: colors.pine }}>Pay now (booking fee)</AppText><AppText selectable style={{ fontSize: 13, fontFamily: fonts.bold, color: colors.pine }}>{money(bookingFee)}</AppText></View>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 12 }}><AppText style={{ fontSize: 13 }}>Pay at the stay</AppText><AppText selectable style={{ fontSize: 13 }}>{money(payable - bookingFee)}</AppText></View>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 12 }}><AppText style={{ fontSize: 12, color: colors.fern }}>Taxes and fees</AppText><AppText style={{ fontSize: 12, color: colors.fern }}>Paid at the property</AppText></View>
         <AppText style={{ fontSize: 11, lineHeight: 18, color: colors.fern }}>Taxes and fees are added by the property at check-in.</AppText>
       </View>
       <Pressable accessibilityRole="button" onPress={() => router.back()} style={{ minHeight: 44, alignItems: 'center', justifyContent: 'center' }}><AppText style={{ fontFamily: fonts.semibold, fontSize: 13, textDecorationLine: 'underline', color: colors.pine }}>Edit booking details</AppText></Pressable>
     </ScrollView>
     <View style={{ paddingHorizontal: 20, paddingTop: 14, paddingBottom: Math.max(insets.bottom, 16), borderTopWidth: 1, borderColor: colors.stone, gap: 10 }}>
-      <Animated.View layout={LinearTransition.duration(260).easing(ease)} style={{ flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between', gap: 12 }}>
-        <AppText style={{ fontSize: 12, color: colors.fern }}>{discount ? `You save ${money(discount)}` : 'Total before taxes'}</AppText>
-        <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 8 }}>
-          {discount ? <AppText style={{ fontSize: 13, color: colors.fern, textDecorationLine: 'line-through' }}>{money(estimate.subtotal + bookingFee)}</AppText> : null}
-          <Animated.Text key={payable} entering={FadeIn.duration(260)} selectable style={{ fontFamily: fonts.bold, fontSize: 20, color: colors.ink }}>{money(payable)}</Animated.Text>
+      <Animated.View layout={LinearTransition.duration(260).easing(ease)} style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+        {/* Left: the complete amount for the stay. Right: what the guest pays now, the flat booking fee. */}
+        <View style={{ flex: 1, gap: 2 }}>
+          <AppText style={{ fontSize: 12, color: colors.fern }}>Total amount</AppText>
+          <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 6, flexWrap: 'wrap' }}>
+            <Animated.Text key={payable} entering={FadeIn.duration(260)} selectable style={{ fontFamily: fonts.bold, fontSize: 18, color: colors.ink }}>{money(payable)}</Animated.Text>
+            {discount ? <AppText style={{ fontSize: 12, color: colors.fern, textDecorationLine: 'line-through' }}>{money(estimate.subtotal + bookingFee)}</AppText> : null}
+          </View>
+          <AppText style={{ fontSize: 11, color: discount ? colors.save : colors.fern, fontFamily: discount ? fonts.semibold : fonts.regular }}>{discount ? `You save ${money(discount)}` : `${money(payable - bookingFee)} at check-in`}</AppText>
+        </View>
+        <View accessible accessibilityLabel={`Pay now ${money(bookingFee)}`} style={{ alignItems: 'flex-end', paddingVertical: 9, paddingHorizontal: 16, borderRadius: 14, backgroundColor: colors.meadow, borderWidth: 1, borderColor: colors.pine }}>
+          <AppText style={{ fontSize: 11, fontFamily: fonts.semibold, color: colors.pine }}>Pay now</AppText>
+          <AppText selectable style={{ fontFamily: fonts.bold, fontSize: 24, color: colors.pine, letterSpacing: -0.5 }}>{money(bookingFee)}</AppText>
         </View>
       </Animated.View>
       {bookingError ? <AppText selectable style={{ color: colors.error, fontSize: 12, lineHeight: 18 }}>{bookingError}</AppText> : null}
