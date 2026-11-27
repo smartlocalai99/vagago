@@ -43,7 +43,6 @@ function AppScreens({ storageError, dismissStorageError }: { storageError: strin
         <Stack.Screen name="search" options={{ title: 'Search stays', presentation: 'modal', headerLeft: () => <Pressable accessibilityRole="button" accessibilityLabel="Close search" onPress={() => router.canGoBack() ? router.back() : router.replace('/')} style={{ minWidth: 44, minHeight: 44, justifyContent: 'center' }}><Icon name="close" size={22} /></Pressable> }} />
         <Stack.Screen name="plan" options={{ headerShown: false }} />
         <Stack.Screen name="review" options={{ title: 'Confirm your stay' }} />
-        <Stack.Screen name="payment" options={{ title: 'Payment' }} />
         <Stack.Screen name="booking/[id]" options={{ title: 'Your booking' }} />
         <Stack.Screen name="faq" options={{ title: 'Questions and answers' }} />
         <Stack.Screen name="login" options={{ title: 'Log in', presentation: 'modal' }} />

@@ -120,8 +120,8 @@ function StayDetailContent({ stay, initialPhoto }: { stay: Stay; initialPhoto: n
 
         <Reveal delay={80}><View style={{ backgroundColor: colors.brand, borderRadius: 16, borderCurve: 'continuous', padding: 18, flexDirection: 'row', alignItems: 'center', gap: 14 }}>
           <View style={{ flex: 1, gap: 6 }}>
-            <Text style={{ fontFamily: fonts.bold, fontSize: 19, lineHeight: 25, color: colors.white }}>Book now, pay at the stay</Text>
-            <Text style={{ fontFamily: fonts.regular, fontSize: 13, lineHeight: 19, color: 'rgba(255,255,255,0.8)' }}>No advance payment. The exact address and directions unlock as soon as you book.</Text>
+            <Text style={{ fontFamily: fonts.bold, fontSize: 19, lineHeight: 25, color: colors.white }}>Book for just ₹100</Text>
+            <Text style={{ fontFamily: fonts.regular, fontSize: 13, lineHeight: 19, color: 'rgba(255,255,255,0.8)' }}>Pay the ₹100 booking fee now and the rest at the stay. The exact address and directions unlock as soon as you book.</Text>
           </View>
           <Image source={brandMark} accessible={false} contentFit="contain" style={{ width: 62, height: 47 }} />
         </View></Reveal>
