@@ -1,8 +1,9 @@
+import { useRouter } from 'next/router';
 import { useRef, useState, type FormEvent } from 'react';
 import { Icon } from '@/components/icons';
 import { Button, Field, Input, StatusPill, TextArea } from '@/components/admin/ui';
 import {
-  deletePhoto, deleteRoom, makeCover, saveAmenities, saveLocation, saveRoom, updateProperty, uploadPhotos,
+  deletePhoto, deleteProperty, deleteRoom, makeCover, saveAmenities, saveLocation, saveRoom, updateProperty, uploadPhotos,
   useAmenities, type PropertyDetail, type RoomRow,
 } from '@/lib/data';
 import { thumbUrl } from '@/lib/supabase';
@@ -288,5 +289,31 @@ export function PublishStep({ hotel, onError, onJump }: StepProps & { onJump: (s
       </> : hotel.status === 'suspended' ? <Button type="button" disabled={busy} onClick={() => void setStatus('published')}>Reinstate and publish</Button>
         : <Button type="button" disabled={busy || !ready} onClick={() => void setStatus('published')}>{ready ? 'Publish to the app' : 'Complete the checklist to publish'}</Button>}
     </div>
+    <DeleteHotel hotel={hotel} onError={onError} />
   </div>;
+}
+
+function DeleteHotel({ hotel, onError }: { hotel: PropertyDetail; onError: (message: string | null) => void }) {
+  const router = useRouter();
+  const [deleting, setDeleting] = useState(false);
+  const remove = async () => {
+    if (!window.confirm(`Delete ${hotel.name}? Its rooms, ${hotel.property_photos.length} photos and listing are removed for good. This can’t be undone.`)) return;
+    setDeleting(true);
+    onError(null);
+    try {
+      await deleteProperty(hotel.id);
+      await router.replace('/admin/hotels/');
+    } catch (caught) {
+      onError(message(caught, 'Couldn’t delete the hotel.'));
+      setDeleting(false);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+  return <section className="mt-10 rounded-2xl border border-danger/25 p-4">
+    <p className="text-[15px] font-bold">Delete hotel</p>
+    <p className="mt-1 text-[13px] leading-5 text-muted">Removes the listing, rooms and photos for good. Hotels with bookings can’t be deleted; suspend them instead.</p>
+    <Button type="button" variant="danger" className="mt-3 w-full" disabled={deleting} onClick={() => void remove()}>
+      <span className="inline-flex items-center gap-2"><Icon name="trash" size={17} />{deleting ? 'Deleting…' : 'Delete hotel'}</span>
+    </Button>
+  </section>;
 }

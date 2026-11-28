@@ -74,6 +74,20 @@ function patchSummary(id: string, change: Partial<PropertySummary>) {
   return mutate<PropertySummary[]>('properties', (list) => list?.map((item) => item.id === id ? { ...item, ...change } : item), { revalidate: false });
 }
 
+// Removes a hotel with its rooms, photos and amenities. Hotels with bookings are kept (the
+// database refuses), so booking history survives; suspend those instead.
+export async function deleteProperty(id: string) {
+  const { count } = await supabase.from('reservations').select('id', { count: 'exact', head: true }).eq('property_id', id);
+  if (count) throw new Error(`This hotel has ${count} ${count === 1 ? 'booking' : 'bookings'}, so it can’t be deleted. Suspend it to hide it from guests.`);
+  const bucket = supabase.storage.from('property-photos');
+  const { data: files } = await bucket.list(id, { limit: 1000 });
+  if (files?.length) await bucket.remove(files.map((file) => `${id}/${file.name}`));
+  const { error } = await supabase.from('properties').delete().eq('id', id);
+  if (error) throw new Error(error.code === '23503' ? 'This hotel has bookings, so it can’t be deleted. Suspend it instead.' : error.message);
+  await mutate<PropertySummary[]>('properties', (list) => list?.filter((item) => item.id !== id), { revalidate: false });
+  await mutate(['property', id], undefined, { revalidate: false });
+}
+
 export async function createProperty(values: Tables['properties']['Insert']) {
   const row = unwrap(await supabase.from('properties').insert(values).select('id, name, status, stay_style, area, created_at').single());
   await mutate<PropertySummary[]>('properties', (list) => list ? [{ ...row, property_photos: [], room_types: [{ count: 0 }] }, ...list] : list, { revalidate: false });
