@@ -45,5 +45,11 @@ export type Stay = {
   // Rounded public position; the exact address is released with a booking.
   coordinates: Coordinates;
   rooms: RoomOption[];
+  // 'HH:MM' times, the yes/no house rules the property has stated, and its own extra rules.
+  checkIn: string;
+  checkOut: string;
+  rules: { key: string; allowed: boolean; label: string }[];
+  houseRules: string;
+  cancellationPolicy: string;
 };
 export type Coordinates = { latitude: number; longitude: number };

@@ -1,5 +1,6 @@
 import { useRouter } from 'next/router';
 import { useEffect, useRef, useState } from 'react';
+import type { HousePolicies } from '@/lib/house-rules';
 import { BasicsForm, type Basics } from '@/components/admin/hotel-basics';
 import { AmenitiesStep, checklist, LocationStep, PhotosStep, PublishStep, RoomsStep } from '@/components/admin/hotel-steps';
 import { Icon } from '@/components/icons';
@@ -69,7 +70,7 @@ export default function EditHotel() {
     {step === 'basics' ? <BasicsForm key={hotel.id} formId="basics" onSubmit={(values) => void saveBasics(values)} initial={{
       name: hotel.name, stay_style: hotel.stay_style, area: hotel.area, tagline: hotel.tagline ?? '', description: hotel.description ?? '',
       check_in_time: hotel.check_in_time.slice(0, 5), check_out_time: hotel.check_out_time.slice(0, 5),
-      house_rules: hotel.house_rules ?? '', cancellation_policy: hotel.cancellation_policy ?? '',
+      house_rules: hotel.house_rules ?? '', house_policies: (hotel.house_policies ?? {}) as HousePolicies, cancellation_policy: hotel.cancellation_policy ?? '',
     }} /> : null}
     {step === 'location' ? <LocationStep {...stepProps} /> : null}
     {step === 'rooms' ? <RoomsStep {...stepProps} /> : null}

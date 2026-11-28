@@ -1,6 +1,7 @@
 import { createContext, use, useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { readCache, writeCache } from '@/lib/cache';
 import { supabase } from '@/lib/supabase';
+import { statedHouseRules } from '@vagago/domain';
 import type { Stay } from '@/types';
 
 type CatalogState = {
@@ -12,12 +13,13 @@ type CatalogState = {
 };
 
 const CatalogContext = createContext<CatalogState | null>(null);
-const cacheKey = '@vagago/catalog:v2';
+const cacheKey = '@vagago/catalog:v3';
 // Listings change rarely; one request per ten minutes keeps the app current without repeat hits.
 const maxAgeMs = 10 * 60 * 1000;
 
 // One request returns every published listing with its rooms, photos and amenities.
 const listingQuery = `id, name, tagline, description, stay_style, area, approx_latitude, approx_longitude,
+  check_in_time, check_out_time, house_rules, house_policies, cancellation_policy,
   room_types (id, name, description, max_guests, bedrooms, beds, base_rate_paise, compare_at_paise, is_active, sort_order),
   property_photos (storage_path, sort_order),
   property_amenities (amenities (name))`;
@@ -25,6 +27,7 @@ const listingQuery = `id, name, tagline, description, stay_style, area, approx_l
 type ListingRow = {
   id: string; name: string; tagline: string | null; description: string | null; stay_style: Stay['stayStyle'];
   area: string; approx_latitude: number | null; approx_longitude: number | null;
+  check_in_time: string; check_out_time: string; house_rules: string | null; house_policies: unknown; cancellation_policy: string | null;
   room_types: { id: string; name: string; description: string | null; max_guests: number; bedrooms: number; beds: string | null;
     base_rate_paise: number; compare_at_paise: number | null; is_active: boolean; sort_order: number }[];
   property_photos: { storage_path: string; sort_order: number }[];
@@ -62,6 +65,11 @@ function toStay(row: ListingRow): Stay | null {
     thumbnail: ordered[0] ? { uri: thumbUrl(ordered[0].storage_path) } : { uri: '' },
     gallery: photos,
     amenities,
+    checkIn: row.check_in_time.slice(0, 5),
+    checkOut: row.check_out_time.slice(0, 5),
+    rules: statedHouseRules(row.house_policies),
+    houseRules: row.house_rules ?? '',
+    cancellationPolicy: row.cancellation_policy ?? '',
     coordinates: { latitude: Number(row.approx_latitude ?? 9.69), longitude: Number(row.approx_longitude ?? 76.91) },
     rooms: rooms.map((room) => ({
       id: room.id,

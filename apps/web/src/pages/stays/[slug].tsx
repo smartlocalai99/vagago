@@ -184,7 +184,7 @@ export default function StayPage({ stay, places }: Props) {
       <nav aria-label="Breadcrumb" className="mb-4 text-[14px] text-muted"><Link href="/" className="hover:text-ink">Home</Link> <span aria-hidden>/</span> <Link href="/stays/" className="hover:text-ink">Stays</Link> <span aria-hidden>/</span> <span className="text-ink">{stay.name}</span></nav>
       <div className="mb-5 flex flex-wrap items-end justify-between gap-4">
         <div>
-          <div className="mb-2 flex flex-wrap gap-2"><Chip icon="home">{`Entire ${styleLabel[stay.style].toLowerCase()}`}</Chip><Chip icon="cash" tone="save">Pay at stay</Chip></div>
+          <div className="mb-2 flex flex-wrap gap-2"><Chip icon="home">{`Entire ${styleLabel[stay.style].toLowerCase()}`}</Chip><Chip icon="cash" tone="save">Pay at stay</Chip>{stay.rules.find((rule) => rule.key === 'couples' && rule.allowed) ? <Chip icon="heart" tone="couple">Couple friendly</Chip> : null}</div>
           <h1 className="text-[30px] leading-tight font-extrabold tracking-[-0.03em] md:text-[40px]">{stay.name}</h1>
           <p className="mt-1 text-[16px] text-muted">{stay.area}, Vagamon, Kerala | {stay.bedrooms} {stay.bedrooms === 1 ? 'bedroom' : 'bedrooms'} | Up to {stay.capacity} guests</p>
         </div>
@@ -257,9 +257,18 @@ export default function StayPage({ stay, places }: Props) {
             <dl className="mt-4 grid gap-5 sm:grid-cols-2">
               <div className="flex gap-3"><Icon name="clock" className="shrink-0 text-forest" /><div><dt className="font-bold">Check-in and check-out</dt><dd className="text-[15px] text-muted">Check in from {clock(stay.checkIn)}, check out by {clock(stay.checkOut)}</dd></div></div>
               <div className="flex gap-3"><Icon name="calendar" className="shrink-0 text-forest" /><div><dt className="font-bold">Cancellation</dt><dd className="text-[15px] text-muted">{stay.cancellationPolicy ?? 'Cancel from My bookings any time before your check-in day. Nothing is charged, as you pay at the stay.'}</dd></div></div>
-              {stay.houseRules ? <div className="flex gap-3 sm:col-span-2"><Icon name="shield" className="shrink-0 text-forest" /><div><dt className="font-bold">House rules</dt><dd className="text-[15px] whitespace-pre-line text-muted">{stay.houseRules}</dd></div></div> : null}
             </dl>
           </section>
+
+          {stay.rules.length || stay.houseRules ? <section>
+            <h2 className="text-[24px] font-extrabold tracking-[-0.02em]">House rules</h2>
+            {stay.rules.length ? <ul className="mt-4 flex flex-wrap gap-2">
+              {stay.rules.map((rule) => <li key={rule.key} className={`inline-flex items-center gap-2 rounded-full py-2 pr-3.5 pl-2 text-[14px] font-semibold ${rule.allowed ? 'bg-ok-soft text-ok' : 'bg-surface text-muted'}`}>
+                <span className={`grid size-6 shrink-0 place-items-center rounded-full ${rule.allowed ? 'bg-ok text-white' : 'bg-white text-muted'}`}><Icon name={rule.allowed ? 'check' : 'close'} size={13} /></span>{rule.label}
+              </li>)}
+            </ul> : null}
+            {stay.houseRules ? <p className="mt-4 text-[15px] leading-6 whitespace-pre-line text-muted">{stay.houseRules}</p> : null}
+          </section> : null}
         </div>
 
         <aside className="lg:sticky lg:top-24 lg:self-start">
@@ -270,7 +279,7 @@ export default function StayPage({ stay, places }: Props) {
 
     <div className="fixed inset-x-0 bottom-0 z-30 flex items-center justify-between gap-4 border-t border-line bg-white px-4 pt-3 pb-[max(12px,env(safe-area-inset-bottom))] lg:hidden">
       <div><DealPrice rate={room.rate} compareAt={room.compareAt} size="md" /><p className="text-[13px] text-action">+ taxes & fees</p></div>
-      <a href="#book" className="rounded-xl bg-action px-5 py-3.5 text-[15px] font-bold text-white">Book now & pay at stay</a>
+      <a href="#book" className="rounded-xl bg-action px-5 py-3.5 text-[15px] font-bold text-white">Book now</a>
     </div>
   </SiteLayout>;
 }

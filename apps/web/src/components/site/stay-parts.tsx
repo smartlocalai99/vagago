@@ -16,8 +16,8 @@ export function DealPrice({ rate, compareAt, size = 'lg' }: { rate: number; comp
   </p>;
 }
 
-export function Chip({ icon, children, tone = 'neutral' }: { icon?: IconName; children: string; tone?: 'neutral' | 'save' }) {
-  return <span className={`inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-[13px] font-medium ${tone === 'save' ? 'bg-save-soft text-save' : 'bg-surface text-ink'}`}>
+export function Chip({ icon, children, tone = 'neutral' }: { icon?: IconName; children: string; tone?: 'neutral' | 'save' | 'couple' }) {
+  return <span className={`inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-[13px] font-medium ${tone === 'save' ? 'bg-save-soft text-save' : tone === 'couple' ? 'bg-[#FDECEE] text-[#C21F35]' : 'bg-surface text-ink'}`}>
     {icon ? <Icon name={icon} size={15} /> : null}{children}
   </span>;
 }

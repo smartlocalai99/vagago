@@ -39,3 +39,7 @@ export function estimateStaySubtotal(nightlyRate: number, checkIn: string, check
   includesTaxesAndFees: false;
   availabilityChecked: false;
 } | null;
+export type HouseRuleKey = 'couples' | 'local_id' | 'pets' | 'kids' | 'smoking' | 'alcohol' | 'parties' | 'visitors' | 'outside_food' | 'bonfire' | 'music';
+export type HousePolicies = Partial<Record<HouseRuleKey, boolean>>;
+export const houseRuleOptions: { key: HouseRuleKey; yes: string; no: string }[];
+export function statedHouseRules(policies: unknown): { key: HouseRuleKey; allowed: boolean; label: string }[];

@@ -185,3 +185,34 @@ export function estimateStaySubtotal(nightlyRate, checkIn, checkOut) {
     availabilityChecked: false,
   };
 }
+
+/**
+ * House rules a property sets as allowed (true) or not allowed (false); a missing key means not stated.
+ * Stored on properties.house_policies. Order is the order guests see them.
+ */
+export const houseRuleOptions = [
+  { key: 'couples', yes: 'Couple friendly', no: 'Unmarried couples not allowed' },
+  { key: 'local_id', yes: 'Local IDs accepted', no: 'Local IDs not accepted' },
+  { key: 'pets', yes: 'Pet friendly', no: 'No pets' },
+  { key: 'kids', yes: 'Kids welcome', no: 'Not suitable for kids' },
+  { key: 'smoking', yes: 'Smoking allowed', no: 'No smoking' },
+  { key: 'alcohol', yes: 'Alcohol allowed', no: 'No alcohol' },
+  { key: 'parties', yes: 'Parties and events allowed', no: 'No parties or events' },
+  { key: 'visitors', yes: 'Visitors allowed', no: 'No outside visitors' },
+  { key: 'outside_food', yes: 'Outside food allowed', no: 'No outside food' },
+  { key: 'bonfire', yes: 'Bonfire allowed', no: 'No bonfire' },
+  { key: 'music', yes: 'Music allowed', no: 'No loud music' },
+];
+
+/**
+ * The rules a property has stated, in display order, with the label to show.
+ * @param {unknown} policies
+ * @returns {{key:string, allowed:boolean, label:string}[]}
+ */
+export function statedHouseRules(policies) {
+  if (!policies || typeof policies !== 'object' || Array.isArray(policies)) return [];
+  const record = /** @type {Record<string, unknown>} */ (policies);
+  return houseRuleOptions.flatMap((rule) => typeof record[rule.key] === 'boolean'
+    ? [{ key: rule.key, allowed: /** @type {boolean} */ (record[rule.key]), label: record[rule.key] ? rule.yes : rule.no }]
+    : []);
+}

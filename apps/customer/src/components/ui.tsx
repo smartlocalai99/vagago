@@ -43,11 +43,11 @@ export function SectionHeader({ title, eyebrow, action, onAction }: { title: str
 const styleLabels: Record<Stay['stayStyle'], string> = { villa: 'Villa', cottage: 'Cottage', homestay: 'Homestay', resort: 'Resort', hotel: 'Hotel' };
 export const stayStyleLabel = (stay: Stay) => styleLabels[stay.stayStyle];
 
-export function Chip({ label, icon, tone = 'neutral' }: { label: string; icon?: IconName; tone?: 'neutral' | 'save' }) {
-  const save = tone === 'save';
-  return <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 8, paddingVertical: 4, borderRadius: 6, backgroundColor: save ? colors.softSave : colors.canvas }}>
-    {icon ? <Icon name={icon} size={14} color={save ? colors.save : colors.ink} /> : null}
-    <Text style={{ fontFamily: fonts.medium, fontSize: 12, lineHeight: 17, color: save ? colors.save : colors.ink }}>{label}</Text>
+export function Chip({ label, icon, tone = 'neutral' }: { label: string; icon?: IconName; tone?: 'neutral' | 'save' | 'couple' }) {
+  const [background, ink] = tone === 'save' ? [colors.softSave, colors.save] : tone === 'couple' ? [colors.softAction, colors.action] : [colors.canvas, colors.ink];
+  return <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 8, paddingVertical: 4, borderRadius: 6, backgroundColor: background }}>
+    {icon ? <Icon name={icon} size={14} color={ink} filled={tone === 'couple'} /> : null}
+    <Text style={{ fontFamily: fonts.medium, fontSize: 12, lineHeight: 17, color: ink }}>{label}</Text>
   </View>;
 }
 

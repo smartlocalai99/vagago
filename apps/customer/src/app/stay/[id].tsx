@@ -108,6 +108,7 @@ function StayDetailContent({ stay, initialPhoto }: { stay: Stay; initialPhoto: n
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
             <Chip icon="home" label={`Entire ${stayStyleLabel(stay).toLowerCase()}`} />
             <Chip icon="cash" label="Pay at stay" tone="save" />
+            {stay.rules.some((rule) => rule.key === 'couples' && rule.allowed) ? <Chip icon="heart" label="Couple friendly" tone="couple" /> : null}
           </View>
           <Heading size={27} style={{ lineHeight: 34, letterSpacing: -0.6 }}>{stay.name}</Heading>
           {stay.tagline ? <AppText style={{ color: colors.fern, fontSize: 14 }}>{stay.tagline}</AppText> : null}
@@ -153,6 +154,8 @@ function StayDetailContent({ stay, initialPhoto }: { stay: Stay; initialPhoto: n
           </View>
         </View> : null}
 
+        <GoodToKnow stay={stay} />
+
         <View style={{ borderTopWidth: 1, borderColor: colors.stone, paddingTop: 22, gap: 12 }}>
           <View style={{ gap: 4 }}><Heading size={19}>Choose your stay</Heading><AppText style={{ color: colors.fern, fontSize: 12 }}>The whole property is yours</AppText></View>
           {options.map((option) => <AccommodationOption key={option.id} option={option} selected={selected.id === option.id} guests={draft.guests} onSelect={() => setSelectedId(option.id)} />)}
@@ -196,4 +199,43 @@ export default function StayDetails() {
   if (!stay && !ready) return <Page><Stack.Screen options={{ headerShown: true, title: 'Property details' }} /></Page>;
   if (!stay) return <Page><Stack.Screen options={{ headerShown: true, title: 'Property details' }} /><EmptyState title="Stay not found" body="This property is no longer listed." action="Explore stays" onAction={() => router.replace('/')} icon="search" /></Page>;
   return <StayDetailContent key={stay.id} stay={stay} initialPhoto={Number(photo) || 0} />;
+}
+
+const clock = (time: string) => {
+  const [hour, minute] = time.split(':').map(Number);
+  return `${hour % 12 || 12}${minute ? `:${String(minute).padStart(2, '0')}` : ''} ${hour < 12 ? 'AM' : 'PM'}`;
+};
+
+// Check-in and check-out first, then the yes/no house rules, the property's own rules and cancellation.
+function GoodToKnow({ stay }: { stay: Stay }) {
+  return <View style={{ gap: 14 }}>
+    <Heading size={19}>Good to know</Heading>
+    <View style={{ flexDirection: 'row', gap: 10 }}>
+      {([['Check-in', `From ${clock(stay.checkIn)}`], ['Check-out', `By ${clock(stay.checkOut)}`]] as const).map(([label, value]) =>
+        <View key={label} style={{ flex: 1, padding: 14, borderRadius: 14, borderCurve: 'continuous', backgroundColor: colors.canvas, gap: 3 }}>
+          <AppText style={{ fontSize: 11, color: colors.fern }}>{label}</AppText>
+          <AppText style={{ fontFamily: fonts.bold, fontSize: 15 }}>{value}</AppText>
+        </View>)}
+    </View>
+    {stay.rules.length ? <View style={{ gap: 10 }}>
+      <AppText style={{ fontFamily: fonts.bold, fontSize: 14 }}>House rules</AppText>
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+        {stay.rules.map((rule) => <View key={rule.key} accessibilityLabel={rule.label}
+          style={{ flexDirection: 'row', alignItems: 'center', gap: 7, paddingVertical: 8, paddingLeft: 8, paddingRight: 12, borderRadius: 20, backgroundColor: rule.allowed ? colors.softOk : colors.canvas }}>
+          <View style={{ width: 20, height: 20, borderRadius: 10, alignItems: 'center', justifyContent: 'center', backgroundColor: rule.allowed ? colors.ok : colors.white }}>
+            <Icon name={rule.allowed ? 'check' : 'close'} size={12} color={rule.allowed ? colors.white : colors.fern} />
+          </View>
+          <AppText style={{ fontSize: 13, lineHeight: 18, fontFamily: fonts.semibold, color: rule.allowed ? colors.ok : colors.fern }}>{rule.label}</AppText>
+        </View>)}
+      </View>
+    </View> : null}
+    {stay.houseRules ? <AppText style={{ fontSize: 13, lineHeight: 20, color: colors.fern }}>{stay.houseRules}</AppText> : null}
+    <View style={{ flexDirection: 'row', gap: 10, alignItems: 'flex-start', padding: 14, borderRadius: 14, borderWidth: 1, borderColor: colors.stone }}>
+      <Icon name="calendar" size={18} />
+      <View style={{ flex: 1, gap: 2 }}>
+        <AppText style={{ fontFamily: fonts.bold, fontSize: 13 }}>Cancellation</AppText>
+        <AppText style={{ fontSize: 12, lineHeight: 18, color: colors.fern }}>{stay.cancellationPolicy || 'Cancel from My bookings any time before your check-in day.'}</AppText>
+      </View>
+    </View>
+  </View>;
 }

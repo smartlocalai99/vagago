@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './database.types';
+import { statedHouseRules } from './house-rules';
 import { amenityArt } from './places';
 
 type StayStyle = Database['public']['Enums']['stay_style'];
@@ -14,6 +15,8 @@ export type Listing = {
   // Rounded public position (about 100 m); the exact address is released with a booking.
   latitude: number; longitude: number;
   checkIn: string; checkOut: string; houseRules: string | null; cancellationPolicy: string | null;
+  // Rules the property has said yes or no to (couple friendly, pets, smoking, ...).
+  rules: { key: string; allowed: boolean; label: string }[];
   photos: Photo[]; amenities: string[]; rooms: Room[];
   rate: number; compareAt: number | null; capacity: number; bedrooms: number;
 };
@@ -30,7 +33,7 @@ export const photoUrl = (path: string) => `${url}/storage/v1/object/public/prope
 export const thumbUrl = (path: string) => photoUrl(path.replace(/\.(\w+)$/, '.thumb.$1'));
 
 export const listingColumns = `id, slug, name, tagline, description, stay_style, area, approx_latitude, approx_longitude,
-  check_in_time, check_out_time, house_rules, cancellation_policy,
+  check_in_time, check_out_time, house_rules, house_policies, cancellation_policy,
   room_types (id, name, description, max_guests, bedrooms, beds, base_rate_paise, compare_at_paise, is_active, sort_order),
   property_photos (storage_path, sort_order),
   property_amenities (amenities (name))`;
@@ -38,7 +41,7 @@ export const listingColumns = `id, slug, name, tagline, description, stay_style,
 type Row = {
   id: string; slug: string; name: string; tagline: string | null; description: string | null; stay_style: StayStyle; area: string;
   approx_latitude: number | null; approx_longitude: number | null; check_in_time: string; check_out_time: string;
-  house_rules: string | null; cancellation_policy: string | null;
+  house_rules: string | null; house_policies: unknown; cancellation_policy: string | null;
   room_types: { id: string; name: string; description: string | null; max_guests: number; bedrooms: number; beds: string | null;
     base_rate_paise: number; compare_at_paise: number | null; is_active: boolean; sort_order: number }[];
   property_photos: { storage_path: string; sort_order: number }[];
@@ -56,7 +59,7 @@ export function toListing(row: Row): Listing | null {
     style: row.stay_style, area: row.area,
     latitude: Number(row.approx_latitude ?? 9.69), longitude: Number(row.approx_longitude ?? 76.91),
     checkIn: row.check_in_time.slice(0, 5), checkOut: row.check_out_time.slice(0, 5),
-    houseRules: row.house_rules, cancellationPolicy: row.cancellation_policy,
+    houseRules: row.house_rules, cancellationPolicy: row.cancellation_policy, rules: statedHouseRules(row.house_policies),
     photos: [...row.property_photos].sort((a, b) => a.sort_order - b.sort_order)
       .map((photo) => ({ full: photoUrl(photo.storage_path), thumb: thumbUrl(photo.storage_path) })),
     amenities: row.property_amenities.flatMap((item) => item.amenities ? [item.amenities.name] : []),
